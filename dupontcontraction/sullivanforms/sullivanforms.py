@@ -194,15 +194,19 @@ class SullivanForm:
                         p += f"t_{{{j}}}"
                     elif e != '0':
                         p += f"t_{{{j}}}^{{{e}}}"
-            
-            if k > 0:
-                r += ' + '
-                
+                        
             if len(p) > 0:
                 if n_monomials > 1:
+                    if k > 0:
+                        r += ' + '
                     r += f"\\left({p}\\right)"
                 else:
-                    r += f"{p}"
+                    if k > 0 and p[0] == '-':
+                        r += f" - {p[1:]}"
+                    else:
+                        if k > 0:
+                            r += ' + '
+                        r += f"{p}"
             if ds:
                 for i in ds.split('|'):
                     r += f"dt_{{{i}}}"
@@ -253,7 +257,41 @@ class SullivanForm:
         return SullivanForm(n_out, form_out)
     
     
+    def __neg__(self):
+        """
+        Negation of a form (unary minus).
+
+        Returns
+        -------
+        SullivanForm
+            Negation.
+
+        """
+        return SullivanForm(
+            self.n,
+            {dt: {m: -c for m, c in p.items()} for dt, p in self.form.items()}
+        )
+    
+    
     def __mul__(self, sf):
+        """
+        Product of two Sullivan forms.
+
+        Parameters
+        ----------
+        sf : SullivanForm
+
+        Raises
+        ------
+        TypeError
+            If simplicial dimensions are incompatible.
+
+        Returns
+        -------
+        SullivanForm
+            Product.
+
+        """
         # check same simplicial dimension
         if self.n != sf.n:
             raise TypeError('Sullivan forms need to have the same simplicial'
@@ -305,5 +343,11 @@ if __name__ == '__main__':
     sf2 = SullivanForm(n, form2)
     print(sf2, '\n')
     
+    one = SullivanForm(n, {'': {'0|0|0|0': '1'}})
+    print(one, '\n')
+    
     print(sf + sf2, '\n')
     print(sf * sf2, '\n')
+    print(sf * one, '\n')
+    print(-one * one, '\n')
+    print(-sf, '\n')
