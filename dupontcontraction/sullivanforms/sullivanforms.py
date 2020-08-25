@@ -10,7 +10,7 @@ import itertools as it
 import fractions
 from copy import deepcopy
 
-import auxiliary_functions as af
+from dupontcontraction.sullivanforms import auxiliary_functions as af
 
 class SullivanForm:
     
@@ -332,6 +332,27 @@ class SullivanForm:
                 del form_out[dt]
         
         return SullivanForm(n_out, form_out)
+    
+    def __rmul__(self, other):
+        """
+        Scalar multiplication of Sullivan form.
+
+        Parameters
+        ----------
+        other : int or Fraction
+            Scalar.
+
+        Returns
+        -------
+        TYPE
+            DESCRIPTION.
+
+        """
+        return SullivanForm(
+            self.n,
+            {dt: {m: other*c for m, c in p.items()} \
+             for dt, p in self.form.items()}
+        )
                 
             
 if __name__ == '__main__':
@@ -354,3 +375,5 @@ if __name__ == '__main__':
     print(sf * one, '\n')
     print(-one * one, '\n')
     print(-sf, '\n')
+    print(3*sf)
+    print(fractions.Fraction('1/2')*sf)

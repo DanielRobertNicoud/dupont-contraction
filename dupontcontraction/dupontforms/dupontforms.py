@@ -6,6 +6,8 @@ import itertools as it
 import fractions
 from copy import deepcopy
 
+import dupontcontraction.sullivanforms.sullivanforms as sf
+
 class DupontForm:
     
     def __init__(self, n, form):
@@ -111,7 +113,6 @@ class DupontForm:
         
         r = ''
         for k, w in enumerate(self.form):
-            print(k, w)
             c = self.form[w]
             
             if k > 0:
@@ -184,6 +185,38 @@ class DupontForm:
         return DupontForm(self.n, out_form)
         
         
+    def i(self):
+        """
+        Map i of the contraction, returns a SullivanForm.
+        """
+        out_n = self.n
+        out_form = sf.SullivanForm(out_n, {})
+        
+        for w, c in self.form.items():
+            if w == '':
+                aux_sf = sf.SullivanForm(
+                    out_n,
+                    {'': {'|'.join(['0' for i in range(out_n + 1)]): c}}
+                )
+            else:
+                w_split = w.split('|')
+                # Sullivan form associated to w
+                aux_sf = {}
+                for k in range(len(w_split)):
+                    sign = (-1)**k
+                    dt = '|'.join(w_split[:k] + w_split[k+1:])
+                    
+                    p = ['0' for i in range(out_n + 1)]
+                    p[int(w_split[k])] = '1'
+                    p = '|'.join(p)
+                    
+                    aux_sf[dt] = {p: sign*c}
+                
+                aux_sf = sf.SullivanForm(out_n, aux_sf)
+            
+            out_form += aux_sf
+        
+        return out_form
         
 
 if __name__ == '__main__':
@@ -193,8 +226,11 @@ if __name__ == '__main__':
     df = DupontForm(n, form)
     print(df, '\n')
     
-    form2 = {'': '3'}
+    form2 = {'1': '3'}
     df2 = DupontForm(n, form2)
     print(df2, '\n')
     
     print(df + df2, '\n')
+    
+    print(df.i(), '\n')
+    print(df2.i(), '\n')
