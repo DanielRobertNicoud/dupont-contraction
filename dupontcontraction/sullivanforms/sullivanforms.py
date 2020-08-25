@@ -62,6 +62,9 @@ class SullivanForm:
         self.n = n
         self.is_zero = False
         
+        if isinstance(form, str):
+            raise Exception('string argument for form is not implemented yet')
+        
         if isinstance(form, dict):
             out_form = {}
             
@@ -132,8 +135,8 @@ class SullivanForm:
             else:
                 self.is_zero = True
                 self.form = {}
-        elif isinstance(form, str):
-            raise Exception('string argument for form is not implemented yet')
+            
+            return
         
         
     def __repr__(self):
