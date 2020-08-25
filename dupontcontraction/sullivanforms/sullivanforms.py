@@ -199,7 +199,7 @@ class SullivanForm:
                     
                 if c == 1:
                     if m == '|'.join(['0' for j in range(self.n + 1)]) \
-                        and ds == '':
+                        and (ds == '' or len(monomials) > 1):
                         
                         p += '1'
                     else:
@@ -552,6 +552,167 @@ class SullivanForm:
                     )
         
         return out_form
+    
+    
+    def apply_permutation(self, permutation):
+        """
+        Action of permutation on a form (mapping t_i to t_permutation(i)).
+        
+        Permutation given as a dictionary, an be only partial in which case it
+        is automatically completed with identity in all missing values.
+        
+        Eg: {1: 2, 2: 1} is the switch (1 2).
+
+        Parameters
+        ----------
+        permutation : dict
+            Permutation to apply.
+
+        Returns
+        -------
+        SullivanForm
+            Permuted form.
+
+        """
+        
+        # complete permutation
+        for i in range(self.n + 1):
+            if i not in permutation:
+                permutation[i] = i
+        
+        # inverse permutation
+        permutation_inv = {j: i for i, j in permutation.items()}
+        
+        
+        out_n = self.n
+        out_form = {}
+        
+        for dt, p in self.form.items():
+            
+            # permute dt
+            if dt == '':
+                dt_split = []
+            else:
+                dt_split = [int(i) for i in dt.split('|')]
+            aux_dt = [str(permutation[i]) for i in dt_split]
+            aux_dt = '|'.join(aux_dt)
+            
+            aux_p = {}
+            for m, c in p.items():
+                # permute t
+                m_split = [int(e) for e in m.split('|')]
+                aux_m = [str(m_split[permutation_inv[i]]) \
+                         for i in range(out_n + 1)]
+                aux_m = '|'.join(aux_m)
+                
+                aux_p[aux_m] = c
+            
+            out_form[aux_dt] = aux_p
+        
+        return SullivanForm(out_n, out_form)
+    
+    
+    def reduce(self, eliminate=0):
+        """
+        Simplify the form by eliminating all occurrences of t_[eliminate].
+
+        Parameters
+        ----------
+        eliminate : int, optional
+            The t to eliminate from the expression. The default is 0.
+
+        Returns
+        -------
+        SullivanForm
+            Simplified form.
+
+        """
+        
+        out_n = self.n
+        
+        # first reduce the dt
+        temp_form = SullivanForm.zero(out_n)
+        for dt, p in self.form.items():
+            if dt == '':
+                dt_split = []
+            else:
+                dt_split = [int(i) for i in dt.split('|')]
+                        
+            if eliminate not in dt_split:
+                temp_form += SullivanForm(out_n, {dt: p})
+            else:
+                i_elim = dt_split.index(eliminate)
+                
+                aux_form = {}
+                for i in range(out_n + 1):
+                    if i in dt_split:  # either eliminate or already occurring
+                        continue
+                    
+                    aux_dt = deepcopy(dt_split)
+                    aux_dt[i_elim] = i
+                    aux_dt = '|'.join([str(j) for j in aux_dt])
+                    aux_form[aux_dt] = p
+                    
+                # notice the minus sign
+                aux_form = -SullivanForm(out_n, aux_form)
+                
+                temp_form += aux_form
+        
+        # then reduce the polynomials
+        
+        # probably not optimal, but the easiest and clearest way of
+        # implementing it
+        
+        # t_eliminate = 1 - t_0 - ... - t_n () only t_eliminate not appearing
+        # on the right-hand side)
+        replacement_poly = {
+            '|'.join([str(int(j == i)) for j in range(out_n + 1)]): -1 \
+                for i in range(out_n + 1) if i != eliminate
+        }
+        replacement_poly['|'.join(['0']*(out_n + 1))] = 1
+        replacement_poly = SullivanForm(out_n, {'': replacement_poly})
+        
+        # replace occurrences of t_eliminate with the replacement polynomial
+        out_form = SullivanForm.zero(out_n)
+        for dt, p in temp_form.form.items():
+            for m, c in p.items():
+                m_split = [int(e) for e in m.split('|')]
+                
+                # exponent of t_eliminate
+                exponent_elim = m_split[eliminate]
+                
+                if exponent_elim == 0:
+                    out_form += SullivanForm(out_n, {dt: {m: c}})
+                else:
+                    aux_m = m_split
+                    aux_m[eliminate] = 0
+                    aux_m = '|'.join([str(i) for i in aux_m])
+                    aux_form = SullivanForm(out_n, {dt: {aux_m: c}})
+                    
+                    for _ in range(exponent_elim):
+                        aux_form *= replacement_poly
+                        
+                    out_form += aux_form
+        
+        return out_form
+    
+    
+    def hj(self, j):
+        """
+        Implement the auxiliary function h_j (Lunardon, p.7) which will then
+        be used for the contraction.
+
+        Parameters
+        ----------
+        j : int
+            DESCRIPTION.
+
+        Returns
+        -------
+        SullivanForm.
+        """
+        raise Exception('hj not implemented yet')
+        
                 
             
 if __name__ == '__main__':
