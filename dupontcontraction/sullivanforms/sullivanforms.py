@@ -150,6 +150,12 @@ class SullivanForm:
                 self.form = {}
             
             return
+    
+    def zero(n):
+        """
+        The zero form.
+        """
+        return SullivanForm(n, {})
         
         
     def __repr__(self):
@@ -511,6 +517,39 @@ class SullivanForm:
                     
                 aux_duf = sum(aux_duf)
                 out_form += aux_duf            
+        
+        return out_form
+    
+    def d(self):
+        """
+        Differential.
+        """
+        out_n = self.n
+        out_form = SullivanForm.zero(out_n)
+        
+        for dt, p in self.form.items():
+            for m, c in p.items():
+                # d(monomial)
+                split_m = [int(e) for e in m.split('|')]
+                for i, e in enumerate(split_m):
+                    if e == 0:
+                        continue
+                    
+                    aux_split_m = deepcopy(split_m)
+                    aux_split_m[i] -= 1
+                    
+                    aux_m = '|'.join([str(x) for x in aux_split_m])
+                    aux_c = c * e
+                    if dt == '':
+                        aux_dt = str(i)
+                    else:
+                        aux_dt = f"{i}|{dt}"
+                    
+                    # add term to final form
+                    out_form += SullivanForm(
+                        out_n,
+                        {aux_dt: {aux_m: aux_c}}
+                    )
         
         return out_form
                 

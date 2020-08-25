@@ -239,11 +239,12 @@ class DupontForm:
                     
                     aux_sf[dt] = {p: sign*c}
                 
-                aux_sf = sf.SullivanForm(out_n, aux_sf)
+                aux_sf = math.factorial(len(w_split) - 1) * \
+                    sf.SullivanForm(out_n, aux_sf)
             
             out_form += aux_sf
         
-        return math.factorial(out_n)*out_form
+        return out_form
         
 
 if __name__ == '__main__':
