@@ -9,8 +9,21 @@ The base field is Q (the rational numbers).
 import itertools as it
 import fractions
 from copy import deepcopy
+import numpy as np
+import math
+
+import sys
+import os
+sys.path.append(
+    os.path.dirname(
+        os.path.dirname(
+            os.path.dirname(os.path.abspath(__file__))
+        )
+    )
+)
 
 from dupontcontraction.sullivanforms import auxiliary_functions as af
+from dupontcontraction.dupontforms import dupontforms as duf
 
 class SullivanForm:
     
@@ -81,7 +94,7 @@ class SullivanForm:
                             raise TypeError('invalid form')
                     
                     # if we have too many dt_i we get zero
-                    if len(split_key) >= n + 1:
+                    if len(split_key) > n:
                         continue
                     
                     # sign of permutation to order the dt_i
@@ -353,6 +366,153 @@ class SullivanForm:
             {dt: {m: other*c for m, c in p.items()} \
              for dt, p in self.form.items()}
         )
+    
+    
+    def pullback(self, f):
+        """
+        Pullback of Sullivan form of simplicial degree n by injective,
+        increasing map f\in I(m, n), encoded as a subset of [0,...,n].
+
+        Parameters
+        ----------
+        f : list
+            Subset of [0,...,n].
+
+        Returns
+        -------
+        SullivanForm
+            Pullback along f.
+        """
+        # check that f is valid
+        if len([i for i in f if i < 0 or i > self.n]) > 0:
+            raise TypeError('Invalid f.')
+        
+        # f as map from image to range
+        f = {j: i for i, j in enumerate(f)}
+        
+        out_n = len(f) - 1 # this is m (the simplicial dimension of the output)
+        out_form = {}
+        for dt, p in self.form.items():
+            # pullback of form
+            if dt == '':
+                split_dt = []
+            else:
+                split_dt = [int(i) for i in dt.split('|')]
+                
+                # zero form
+                if len(split_dt) > out_n:
+                    continue
+                # also if we have forms not in the sub-simplex
+                if len([i for i in split_dt if i not in f]) > 0:
+                    continue
+            
+            # pullback of polynomials
+            out_p = {}
+            for m, c in p.items():
+                split_m = [int(i) for i in m.split('|')]
+                
+                # zero polynomial on restriction
+                if len([i for i, e in enumerate(split_m) \
+                        if e > 0 and i not in f]) > 0:
+                    continue
+                
+                out_m = [e for i, e in enumerate(split_m) if i in f]
+                out_m = '|'.join([str(i) for i in out_m])
+                
+                out_p[out_m] = c
+            
+            # map dt to range of f
+            out_form['|'.join([str(f[i]) for i in split_dt])] = out_p
+            
+        return SullivanForm(out_n, out_form)
+            
+        
+        raise Exception('to be implemented')
+        
+        return SullivanForm(m, out_form)
+    
+    
+    def p(self):
+        
+        # initialize output form as 0
+        out_n = self.n
+        out_form = duf.DupontForm(out_n, {'': 0})
+        
+        # for each dt, we integrate and add the result to the output form
+        for dt, p in self.form.items():            
+            # in case there is no dt (ie: just a polynomial): evaluation at
+            # the vertices
+            if dt == '':
+                aux_duf = [duf.DupontForm(out_n, {'': 0})]
+                for m, c in p.items():
+                    split_m = [int(e) for e in m.split('|')]
+                    
+                    # loop through vertices of the simplex
+                    n_nonzero, v_nonzero = 0, -1
+                    for v, e in enumerate(split_m):
+                        if e > 0:
+                            n_nonzero += 1
+                            v_nonzero = v
+                    # if more than one are non-zero, then we get zero
+                    if n_nonzero != 1:
+                        continue
+                    else:
+                        aux_duf.append(
+                            duf.DupontForm(
+                                out_n,
+                                {str(v_nonzero): c}
+                            )
+                        )
+                        
+                aux_duf = sum(aux_duf)
+                out_form += aux_duf
+            # otherwise, for proper forms
+            else:
+                aux_duf = [duf.DupontForm(out_n, {'': 0})]
+                
+                split_dt = [int(i) for i in dt.split('|')]
+
+                # we consider all the sub-simplices of dimension where dt could
+                # integrate to something
+                for f in it.combinations(range(out_n+1), len(split_dt) + 1):
+                    # dt needs to cover all coordinates except one
+                    if len([i for i in f if i not in split_dt]) != 1:
+                        continue
+                    
+                    # f as map from image to range
+                    f = {j: i for i, j in enumerate(f)}
+                    
+                    # pullback form
+                    pbf = SullivanForm(out_n, {dt: p}).pullback(f)
+                    
+                    # skip if pullback is zero
+                    if pbf.is_zero:
+                        continue
+                    
+                    # integrate the polynomial
+                    int_poly = 0
+                    # pullback of dt
+                    pb_dt = '|'.join([str(f[i]) for i in split_dt])
+                    sign = [(-1)**i for i in range(pbf.n + 1) \
+                            if i not in [f[j] for j in split_dt]][0]
+                    for m, c in pbf.form[pb_dt].items():
+                        split_m = [int(e) for e in m.split('|')]
+                        int_poly += sign * c * \
+                            np.product([math.factorial(e) for e in split_m])/ \
+                            math.factorial(sum(split_m) + pbf.n)
+                    
+                    # add resulting form
+                    aux_duf.append(
+                        duf.DupontForm(
+                            out_n,
+                            {'|'.join([str(i) for i in f]): int_poly}
+                        )
+                    )
+                    
+                aux_duf = sum(aux_duf)
+                out_form += aux_duf            
+        
+        return out_form
                 
             
 if __name__ == '__main__':
@@ -375,5 +535,14 @@ if __name__ == '__main__':
     print(sf * one, '\n')
     print(-one * one, '\n')
     print(-sf, '\n')
-    print(3*sf)
-    print(fractions.Fraction('1/2')*sf)
+    print(3*sf, '\n')
+    print(fractions.Fraction('1/2')*sf, '\n')
+    
+    form3 = {'': {'1|0|0|0': 2, '0|1|0|0': '3/4'}}
+    sf3 = SullivanForm(n, form3)
+    print(sf3.p(), '\n')
+    
+    form_p = {'1|2': {'1|2|0|0': '1/2', '0|1|0|0': '1'}}
+    sfp = SullivanForm(n, form_p)
+    print(sfp, '\n')
+    print(sfp.p(), '\n')

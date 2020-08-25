@@ -5,6 +5,17 @@ Class for Dupont forms.
 import itertools as it
 import fractions
 from copy import deepcopy
+import math
+
+import sys
+import os
+sys.path.append(
+    os.path.dirname(
+        os.path.dirname(
+            os.path.dirname(os.path.abspath(__file__))
+        )
+    )
+)
 
 import dupontcontraction.sullivanforms.sullivanforms as sf
 
@@ -71,7 +82,8 @@ class DupontForm:
                         raise TypeError('invalid form')
                     
                 # check for invalid (zero) forms
-                if len(w_split) >= n + 1:
+                # notice that degree = len(w_split) - 1
+                if len(w_split) > n + 1:
                     continue
                 
                 # sign of permutation
@@ -90,6 +102,8 @@ class DupontForm:
                 w_split.sort()
                 w_out = '|'.join([str(i) for i in w_split])
                 out_form[w_out] = sign*fractions.Fraction(form[w])
+                if out_form[w_out] == 0:
+                    del out_form[w_out]
             
             # check for zero forms
             if not out_form:
@@ -128,7 +142,13 @@ class DupontForm:
                 r += ' '
             
             if c == 1:
-                pass
+                if w == '':
+                    if c.denominator == 1:
+                        r += f"{c.numerator}"
+                    else:
+                        r += f"\\frac{{{c.numerator}}}{{{c.denominator}}}"
+                else:
+                    pass
             elif c.denominator == 1:
                 r += f"{c.numerator}"
             else:
@@ -183,6 +203,13 @@ class DupontForm:
                 out_form[w] = c
         
         return DupontForm(self.n, out_form)
+    
+    
+    def __radd__(self, other):
+        """
+        Sum of scalar with form.
+        """
+        return DupontForm(self.n, {'': other}) + self
         
         
     def i(self):
@@ -216,7 +243,7 @@ class DupontForm:
             
             out_form += aux_sf
         
-        return out_form
+        return math.factorial(out_n)*out_form
         
 
 if __name__ == '__main__':
