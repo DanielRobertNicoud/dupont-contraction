@@ -295,6 +295,10 @@ class SullivanForm:
         )
     
     
+    def __sub__(self, other):
+        return self + (-other)
+    
+    
     def __mul__(self, sf):
         """
         Product of two Sullivan forms.
@@ -351,6 +355,7 @@ class SullivanForm:
                 del form_out[dt]
         
         return SullivanForm(n_out, form_out)
+    
     
     def __rmul__(self, other):
         """
@@ -711,7 +716,96 @@ class SullivanForm:
         -------
         SullivanForm.
         """
-        raise Exception('hj not implemented yet')
+        
+        if j != 0:
+            # reduce to the case j = 0
+            out_form = self.apply_permutation({0: j, j: 0})
+            out_form = out_form.hj(0)
+            return out_form.apply_permutation({0: j, j: 0})
+        
+        # case j = 0
+        out_n = self.n
+        # first eliminate t_0 from the expression
+        aux_form = self.reduce()
+        # there is an easy formula for a form written as
+        # x1^k1...xn^kn dt_c1 dt_c2 ... dt_cm with 1 < c1 < c2 < ... < cm,
+        # see Lunardon, p. 12
+        out_form = SullivanForm.zero(out_n)
+        for dt, p in aux_form.form.items():
+            if dt == '':
+                # in this case we get 0 for the monomial
+                continue
+            else:
+                dt_split = [int(i) for i in dt.split('|')]
+                
+            for m, c in p.items():
+                m_split = [int(e) for e in m.split('|')]
+                
+                aux_c = c / (sum(m_split) + len(dt_split))
+                
+                for i, k in enumerate(dt_split):
+                    aux_dt = deepcopy(dt_split)
+                    aux_dt.remove(k)
+                    aux_dt = '|'.join([str(j) for j in aux_dt])
+                    
+                    aux_m = deepcopy(m_split)
+                    aux_m[k] += 1
+                    aux_m = '|'.join([str(j) for j in aux_m])
+                    
+                    # notice we start with c_1 and not c_0 in the formula in
+                    # Lunardon, so we take (-1)^(i-1) here
+                    out_form += SullivanForm(
+                        out_n,
+                        {aux_dt: {aux_m: -((-1)**i) * aux_c}}
+                    )
+        
+        return out_form
+    
+    
+    def hf(self, f):
+        """
+        Implement the auxiliary function h_f (Lunardon, p.7) which will then
+        be used for the contraction.
+
+        Parameters
+        ----------
+        f : list or tuple
+            Increasing, elements between 0 and n.
+
+        Returns
+        -------
+        SullivanForm.
+        """
+        # check that f is valid
+        last_i = -1
+        for i in f:
+            if i <= last_i or i < 0 or i > self.n or not isinstance(i, int):
+                raise TypeError('invalid f')
+        
+        out_form = deepcopy(self)
+        for j in f:
+            out_form = out_form.hj(j)
+        
+        return out_form
+    
+    
+    def h(self):
+        """
+        The contraction h.
+
+        Returns
+        -------
+        SullivanForm.
+        """
+        out_form = SullivanForm.zero(self.n)
+        for k in range(1, self.n + 2):
+            for f in it.combinations(range(0, self.n + 1), k):
+                wf = duf.DupontForm(self.n, {'|'.join([str(i) for i in f]): 1})
+                wf = wf.i()
+                
+                out_form += wf * self.hf(f)
+        
+        return out_form
         
                 
             

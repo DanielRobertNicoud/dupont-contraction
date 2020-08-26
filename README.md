@@ -9,8 +9,8 @@ This package provides tools to work and do explicit computations on Sullivan and
 ### Constructors
 
 * `DupontForm(n, form)`: basic constructor, arguments are
- * `n`: simplicial dimension
- * `form`: the actual content of the form, given as a dictionary with keys of the form `i_0|...|i_k` (representing the basic form $\omega_{i_0|...|i_k}$) and corresponding elements given by the rational coefficient of the key form (written as string or integer). For example, the dictionary `{'0|2|3': '1/2', '1': '-1/3', '': 2}` will result in the form 1/2 w_(0|2|3) - 1/3 w_(1) + 2.
+    * `n`: simplicial dimension
+    * `form`: the actual content of the form, given as a dictionary with keys of the form `i_0|...|i_k` (representing the basic form $\omega_{i_0|...|i_k}$) and corresponding elements given by the rational coefficient of the key form (written as string or integer). For example, the dictionary `{'0|2|3': '1/2', '1': '-1/3', '': 2}` will result in the form 1/2 w_(0|2|3) - 1/3 w_(1) + 2.
 
 ### Operations
 
