@@ -8,7 +8,6 @@ The base field is Q (the rational numbers).
 
 import itertools as it
 import fractions
-from copy import deepcopy
 import numpy as np
 import math
 
@@ -156,6 +155,22 @@ class SullivanForm:
         The zero form.
         """
         return SullivanForm(n, {})
+    
+    
+    def copy(self):
+        """
+        Method to replace reliance on deepcopy.
+
+        Returns
+        -------
+        SullivanForm.
+            A copy of self
+
+        """
+        return SullivanForm(
+            self.n,
+            {dt: {m: c for m, c in p.items()} for dt, p in self.form.items()}
+        )
         
         
     def __repr__(self):
@@ -261,13 +276,13 @@ class SullivanForm:
         
         # case where one of the forms is zero
         if self.is_zero:
-            return deepcopy(sf)
+            return sf.copy()
         if sf.is_zero:
-            return deepcopy(self)
+            return self.copy()
         
         # actual addition
         n_out = self.n
-        form_out = deepcopy(self.form)
+        form_out = self.copy().form
         for ds, p in sf.form.items():
             if ds in form_out:
                 form_out[ds] = af._add_polynomials(form_out[ds], p)
@@ -540,7 +555,7 @@ class SullivanForm:
                     if e == 0:
                         continue
                     
-                    aux_split_m = deepcopy(split_m)
+                    aux_split_m = [*split_m]
                     aux_split_m[i] -= 1
                     
                     aux_m = '|'.join([str(x) for x in aux_split_m])
@@ -653,7 +668,7 @@ class SullivanForm:
                     if i in dt_split:  # either eliminate or already occurring
                         continue
                     
-                    aux_dt = deepcopy(dt_split)
+                    aux_dt = [*dt_split]
                     aux_dt[i_elim] = i
                     aux_dt = '|'.join([str(j) for j in aux_dt])
                     aux_form[aux_dt] = p
@@ -744,11 +759,11 @@ class SullivanForm:
                 aux_c = c / (sum(m_split) + len(dt_split))
                 
                 for i, k in enumerate(dt_split):
-                    aux_dt = deepcopy(dt_split)
+                    aux_dt = [*dt_split]
                     aux_dt.remove(k)
                     aux_dt = '|'.join([str(j) for j in aux_dt])
                     
-                    aux_m = deepcopy(m_split)
+                    aux_m = [*m_split]
                     aux_m[k] += 1
                     aux_m = '|'.join([str(j) for j in aux_m])
                     
@@ -782,7 +797,7 @@ class SullivanForm:
             if i <= last_i or i < 0 or i > self.n or not isinstance(i, int):
                 raise TypeError('invalid f')
         
-        out_form = deepcopy(self)
+        out_form = self.copy()
         for j in f:
             out_form = out_form.hj(j)
         

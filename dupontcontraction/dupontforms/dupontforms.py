@@ -162,7 +162,7 @@ class DupontForm:
         return r
                 
     
-    def __add__(self, df):
+    def __add__(self, other):
         """
         Sum of two Dupont forms.
 
@@ -182,19 +182,19 @@ class DupontForm:
 
         """
         # check same simplicial dimension
-        if self.n != df.n:
+        if self.n != other.n:
             raise TypeError('Sullivan forms need to have the same simplicial'
                              ' dimension to be added together.')
         
         # case where one of the forms is zero
         if self.is_zero:
-            return deepcopy(df)
-        if df.is_zero:
+            return deepcopy(other)
+        if other.is_zero:
             return deepcopy(self)
         
         # actual sum
         out_form = deepcopy(self.form)
-        for w, c in df.form.items():
+        for w, c in other.form.items():
             if w in out_form:
                 out_form[w] += c
                 if out_form[w] == 0:
