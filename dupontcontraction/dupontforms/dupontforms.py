@@ -43,6 +43,7 @@ class DupontForm:
                 Keys are of the form i_0|...|i_k indicating the basic form
                 \omega_{i_0...i_k}, and the associated element is the
                 coefficient of that form (a rational number).
+                Note that 1 = \omega_0 + ... + \omega_n
 
         Raises
         ------
@@ -70,9 +71,19 @@ class DupontForm:
         
         if isinstance(form, dict):
             out_form = {}
+            
+            # transform 1 in the sum of the degree 0 basic forms
+            if '' in form:
+                c = fractions.Fraction(form[''])
+                for v in range(n + 1):
+                    if str(v) in form:
+                        form[str(v)] = fractions.Fraction(form[str(v)]) + c
+                    else:
+                        form[str(v)] = c
+            
             for w in form:
                 if w == '':
-                    w_split = []
+                    continue
                 else:
                     w_split = [int(i) for i in w.split('|')]
                     
@@ -111,6 +122,27 @@ class DupontForm:
             
             self.form = out_form
         return
+    
+    
+    def __eq__(self, other):
+        """
+        Check equality of Dupont forms by comparing coefficients on the basis.
+        """        
+        for w, c in self.form.items():
+            if w not in other.form or c != other.form[w]:
+                return False
+        for w, c in other.form.items():
+            if w not in self.form or c != self.form[w]:
+                return False
+        return True
+    
+    
+    def zero(n):
+        """
+        Zero Dupont form of simplicial degree n.
+        """
+        return DupontForm(n, {'': 0})
+        
     
     def __repr__(self):
         """

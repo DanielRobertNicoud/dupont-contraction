@@ -479,9 +479,17 @@ class SullivanForm:
                         if e > 0:
                             n_nonzero += 1
                             v_nonzero = v
+                    
                     # if more than one are non-zero, then we get zero
-                    if n_nonzero != 1:
+                    if n_nonzero > 1:
                         continue
+                    elif n_nonzero == 0:
+                        aux_duf.append(
+                            duf.DupontForm(
+                                out_n,
+                                {'': c}
+                            )
+                        )
                     else:
                         aux_duf.append(
                             duf.DupontForm(
@@ -715,6 +723,35 @@ class SullivanForm:
                     out_form += aux_form
         
         return out_form
+    
+    
+    def __eq__(self, other):
+        """
+        Check for equality of Sullivan forms. We use the fact that by reducing
+        away t_0 we get a representation in the commutative algebra
+        Q[t_1,...,t_n,dt1,...dt_n] and thus we need only compare coefficients.
+        
+        Warning: this applies reduce() to both self and other.
+        """
+        
+        self = self.reduce()
+        other = other.reduce()
+        
+        for dt, p in self.form.items():
+            if dt not in other.form:
+                return False
+            for m, c in p.items():
+                if m not in other.form[dt] or c != other.form[dt][m]:
+                    return False
+        
+        for dt, p in other.form.items():
+            if dt not in self.form:
+                return False
+            for m, c in p.items():
+                if m not in self.form[dt] or c != self.form[dt][m]:
+                    return False
+        
+        return True
     
     
     def hj(self, j):

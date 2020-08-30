@@ -98,7 +98,7 @@ if __name__ == '__main__':
             ['i(w012)', repr(w012.i())],
             ['i(w012)*t1', repr(w012.i() * t1)],
             ['p(i(w012)*t1)', repr((w012.i() * t1).p())],
-            ['h(i(w012)*t1)', repr((w012.i() * t1).h())]
+            ['h(i(w012)*t1)', repr(((w012.i() * t1).h()).reduce())]
         ],
         columns=['expression', 'result']
     )
@@ -131,6 +131,7 @@ if __name__ == '__main__':
     
     df_ex['ip - 1'] = df_ex.apply(lambda row: (row.sullivan.p().i() - row.sullivan).reduce(), axis=1)
     df_ex['dh + hd'] = df_ex.apply(lambda row: (row.sullivan.d().h() + row.sullivan.h().d()).reduce(), axis=1)
+    df_ex['ip - 1 = dh + hd'] = (df_ex['ip - 1'] == df_ex['dh + hd'])
     
     df_ex = df_ex.applymap(repr)
         
