@@ -6,6 +6,7 @@ import itertools as it
 import fractions
 from copy import deepcopy
 import math
+import numpy as np
 
 import sys
 import os
@@ -277,6 +278,50 @@ class DupontForm:
             out_form += aux_sf
         
         return out_form
+    
+    
+    def tree_product(tree):
+        """
+        Compute the basic operation of the Cobar(Bar(Com))-algebra structure on
+        Dupont forms obtained by HTT from Sullivan forms via the Dupont contra-
+        ction. These basic operations are indexed by rooted trees.
+        
+
+        Parameters
+        ----------
+        tree : nested lists of Dupont forms.
+            For example [[a, b], [c, d, e]] with a,...,e Dupont forms. Every
+            vertex needs to be at least binary.
+
+        Returns
+        -------
+        Dupont form
+            The product of the transferred structure.
+
+        """
+        return DupontForm._tree_product(tree)
+    
+    def _tree_product(tree, root=True):
+        
+        if len(tree) < 2:
+            raise TypeError('Invalid tree.')
+        
+        aux_tree = []
+        for sub_tree in tree:
+            # if it is a Dupont form
+            if isinstance(sub_tree, DupontForm):
+                aux_tree.append(sub_tree.i())
+            # otherwise iterate
+            else:
+                aux_tree.append(DupontForm._tree_product(sub_tree, root=False))
+        
+        # now we have just a list of Sullivan form, take the product and apply
+        # h or p depending if we are at the root or not
+        if root:
+            return np.product(aux_tree).p()
+        else:
+            return np.product(aux_tree).h()
+                
         
 
 if __name__ == '__main__':
