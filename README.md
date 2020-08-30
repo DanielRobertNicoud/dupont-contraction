@@ -22,6 +22,7 @@ The following basic operations are supported:
 * sum of Dupont forms (`+`, `sum`),
 * comparison of Dupont forms (`==`).
 * `tree_product(tree)`: transferred $\Omega\mathrm{BCom}$ structure on Dupont forms from the Sullivan forms via the Dupont contraction. The generating operations f this structure are indexed by rooted trees. This function does not encode the abstract operation but calculates it on arguments directly. Its argument represents a planar tree with Dupont forms at the leaves by writing it as a nested list of Dupont forms. For example, `[[w0, w01], w012, [w2, w12]]` for `w0` given by $\omega_0$ and so on, represents the tree with a 3-corolla at the root, with at its leaves the 2-corolla with $\omega_0$ and $\omega_{0|1}$ at the leaves, the Dupont form $\omega_{0|1|2}$, and the 2-corolla with $\omega_2$ and $\omega_{1|2}$ at the leaves.
+* `a_infinity_product(*args)`: transferred $\mathscr{C}_\infty$ structure on Dupont forms from the Sullivan forms via the Dupont contraction. By Getzler-Cheng, equivalently we only give the transferred $\mathscr{A}_\infty$ structure. The arguments `args` are Dupont forms.<br>Warning: This can be very slow for high arities as the function `SullivanForm.reduce()` needs to be called on complex Sullivan forms.
 
 ### Class methods
 

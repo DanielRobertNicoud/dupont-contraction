@@ -19,6 +19,7 @@ sys.path.append(
 )
 
 import dupontcontraction.sullivanforms.sullivanforms as sf
+import dupontcontraction.dupontforms.binary_tree_generator as btg
 
 class DupontForm:
     
@@ -68,7 +69,8 @@ class DupontForm:
         self.is_zero = False
         
         if isinstance(form, str):
-            raise Exception('string argument for form is not implemented yet')
+            raise NotImplementedError('string argument for form is not '
+                                      'implemented yet')
         
         if isinstance(form, dict):
             out_form = {}
@@ -238,6 +240,21 @@ class DupontForm:
         return DupontForm(self.n, out_form)
     
     
+    def __rmul__(self, other):
+        """
+        Scalar multiplicaiton of Dupont forms.
+        """
+        try:
+            other = fractions.Fraction(other)
+        except:
+            raise TypeError('Invalid scalar multiplication.')
+        
+        return DupontForm(
+            self.n,
+            {w: other*c for w, c in self.form.items()}
+        )
+    
+    
     def __radd__(self, other):
         """
         Sum of scalar with form.
@@ -321,21 +338,49 @@ class DupontForm:
             return np.product(aux_tree).p()
         else:
             return np.product(aux_tree).h()
-                
+    
+    
+    def a_infinity_product(*args):
         
+        for duf in args:
+            if not isinstance(duf, DupontForm):
+                raise TypeError('All elements need to be Dupont forms.')
+        
+        out_n = args[0].n
+        for duf in args:
+            if duf.n != out_n:
+                raise ValueError('All Dupont forms need to have the same '
+                                 'simplicial dimension.')
+        
+        arity = len(args)
+        
+        out_form = DupontForm.zero(out_n)
+        for tree in btg.binary_tree_generator(arity):
+            sign = tree[0]
+            tree = btg.map_args(tree, args)
+            
+            form = sign*DupontForm.tree_product(tree)
+            
+            out_form += form
+        
+        return out_form
+
 
 if __name__ == '__main__':
-    n = 3
-    form = {'0|2|1': '3/4',
-            '0|1': '-1'}
-    df = DupontForm(n, form)
-    print(df, '\n')
+    # playground
+    w0 = DupontForm(3, {'0': 1})
+    w1 = DupontForm(3, {'1': 1})
+    w2 = DupontForm(3, {'2': 1})
+    w3 = DupontForm(3, {'3': 1})
+    w01 = DupontForm(3, {'0|1': 1})
+    w02 = DupontForm(3, {'0|2': 1})
+    w03 = DupontForm(3, {'0|3': 1})
+    w12 = DupontForm(3, {'1|2': 1})
+    w13 = DupontForm(3, {'1|3': 1})
+    w23 = DupontForm(3, {'2|3': 1})
+    w012 = DupontForm(3, {'0|1|2': 1})
+    w013 = DupontForm(3, {'0|1|3': 1})
+    w023 = DupontForm(3, {'0|2|3': 1})
+    w123 = DupontForm(3, {'1|2|3': 1})
+    w0123 = DupontForm(3, {'0|1|2|3': 1})
     
-    form2 = {'1': '3'}
-    df2 = DupontForm(n, form2)
-    print(df2, '\n')
-    
-    print(df + df2, '\n')
-    
-    print(df.i(), '\n')
-    print(df2.i(), '\n')

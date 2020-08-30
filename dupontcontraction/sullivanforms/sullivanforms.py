@@ -75,7 +75,8 @@ class SullivanForm:
         self.is_zero = False
         
         if isinstance(form, str):
-            raise Exception('string argument for form is not implemented yet')
+            raise NotImplementedError('string argument for form is not '
+                                      'implemented yet')
         
         if isinstance(form, dict):
             out_form = {}
