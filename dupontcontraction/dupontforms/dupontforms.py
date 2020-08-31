@@ -389,9 +389,3 @@ if __name__ == '__main__':
     w023 = DupontForm(3, {'0|2|3': 1})
     w123 = DupontForm(3, {'1|2|3': 1})
     w0123 = DupontForm(3, {'0|1|2|3': 1})
-    
-    import time
-    
-    t0=time.time()
-    p = DupontForm.a_infinity_product(w01, w01, w01, w01, w0)
-    print(time.time() - t0)
