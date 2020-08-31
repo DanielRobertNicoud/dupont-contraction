@@ -327,10 +327,16 @@ class DupontForm:
         for sub_tree in tree:
             # if it is a Dupont form
             if isinstance(sub_tree, DupontForm):
+                # any appearance of zero makes the whole thing zero
+                if sub_tree.is_zero:
+                    return DupontForm.zero(sub_tree.n)
                 aux_tree.append(sub_tree.i())
             # otherwise iterate
             else:
                 aux_tree.append(DupontForm._tree_product(sub_tree, root=False))
+                # any appearance of zero makes the whole thing zero
+                if aux_tree[-1].is_zero:
+                    return DupontForm.zero(aux_tree[-1].n)
         
         # now we have just a list of Sullivan form, take the product and apply
         # h or p depending if we are at the root or not
@@ -384,3 +390,8 @@ if __name__ == '__main__':
     w123 = DupontForm(3, {'1|2|3': 1})
     w0123 = DupontForm(3, {'0|1|2|3': 1})
     
+    import time
+    
+    t0=time.time()
+    p = DupontForm.a_infinity_product(w01, w01, w01, w01, w0)
+    print(time.time() - t0)

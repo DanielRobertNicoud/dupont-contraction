@@ -858,38 +858,4 @@ class SullivanForm:
                 
                 out_form += wf * self.hf(f)
         
-        return out_form
-        
-                
-            
-if __name__ == '__main__':
-    n = 3
-    form = {'1|3|2': {'0|1|1|0': '-3/7', '2|1|0|0': '1'},
-            '': {'1|1|0|0': '14'}}
-    sf = SullivanForm(n, form)
-    print(sf, '\n')
-    
-    form2 = {'': {'0|0|0|0': '1', '1|1|0|0': '-1'},
-             '1|2|3': {'0|0|0|1': '1'}}
-    sf2 = SullivanForm(n, form2)
-    print(sf2, '\n')
-    
-    one = SullivanForm(n, {'': {'0|0|0|0': '1'}})
-    print(one, '\n')
-    
-    print(sf + sf2, '\n')
-    print(sf * sf2, '\n')
-    print(sf * one, '\n')
-    print(-one * one, '\n')
-    print(-sf, '\n')
-    print(3*sf, '\n')
-    print(fractions.Fraction('1/2')*sf, '\n')
-    
-    form3 = {'': {'1|0|0|0': 2, '0|1|0|0': '3/4'}}
-    sf3 = SullivanForm(n, form3)
-    print(sf3.p(), '\n')
-    
-    form_p = {'1|2': {'1|2|0|0': '1/2', '0|1|0|0': '1'}}
-    sfp = SullivanForm(n, form_p)
-    print(sfp, '\n')
-    print(sfp.p(), '\n')
+        return out_form.reduce()
