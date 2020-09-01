@@ -15,9 +15,11 @@
 
 This package provides tools to work and do explicit computations on Sullivan and Dupont forms, as well as calculating the action of the various maps involved in the Dupont contraction and the transferred structure from the Sullivan algebra (a commutative algebra) to the Dupont algebra (which receives the structure of a commutative algebra up to homotopy).
 
-We work in the homological convention over the field $\mathbb{Q}$ of rational numbers.
+Install this package from [PyPi](https://pypi.org/project/dupont-contraction/1.0.0/): `pip install dupont-contraction`
 
 # Mathematical objects <a name="mathematicalobjects"></a>
+
+We work in the homological convention over the field $\mathbb{Q}$ of rational numbers.
 
 We give a brief recollection of the mathematical objects in play. For more
 details, we direct the reader to the article of Lunardon.
@@ -29,10 +31,9 @@ graded (dg) commutative algebra of polynomial differential forms over the
 standard simplices.
 
 Explicitly, for $k\ge1$
-\[
-\Omega_n = \mathbb{Q}[t_0, \ldots, t_n, dt_0,\ldots, dt_n]/\sim
-\]
-with $t_0 + ... + t_n \sim 1$ and $dt_0 + ... + dt_n \sim 0$.
+$$\Omega_n = \mathbb{Q}[t_0, \ldots, t_n, dt_0,\ldots, dt_n]/\sim$$
+with $t_0 + ... + t_n \sim 1$ and $dt_0 + ... + dt_n \sim 0$. Here the $t_i$
+have degree $0$, the $dt_i$ degree $-1$, and $d(t_i) = dt_i$.
 
 This object has its origin in the works of Sullivan and Bousfield-Guggenheim in
 rational homotopy theory.
