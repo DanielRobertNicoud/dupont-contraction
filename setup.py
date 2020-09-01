@@ -9,11 +9,11 @@ recommend the use of a LaTeX rendered for Github.
     
 setuptools.setup(
     name='dupont-contraction',
-    version='0.1.1',
+    version='1.0.0',
     author='Daniel Robert-Nicoud',
     author_email='daniel.robertnicoud@gmail.com',
-    description="A package for Sullivan and Dupont forms, and the Dupont " \
-        "contraction",
+    description="A package for computations using Sullivan and Dupont forms," \
+        " and the Dupont contraction.",
     long_description=long_description,
     url='https://github.com/DanielRobertNicoud/dupont-contraction',
     install_requires=[
