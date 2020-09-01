@@ -15,7 +15,8 @@
 
 This package provides tools to work and do explicit computations on Sullivan and Dupont forms, as well as calculating the action of the various maps involved in the Dupont contraction and the transferred structure from the Sullivan algebra (a commutative algebra) to the Dupont algebra (which receives the structure of a commutative algebra up to homotopy).
 
-Install this package from [PyPi](https://pypi.org/project/dupont-contraction/1.0.0/): `pip install dupont-contraction`
+Install this package from [PyPi](https://pypi.org/project/dupont-contraction/1.0.0/): `pip install dupont-contraction`<br>
+Use this package in your code: `import dupontcontraction`
 
 # Mathematical objects <a name="mathematicalobjects"></a>
 
