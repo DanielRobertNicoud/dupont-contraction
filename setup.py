@@ -2,7 +2,15 @@ import setuptools
 
 long_description = """
 Please find the package documentation in the original Github repository_. We 
-recommend the use of a LaTeX rendered for Github.
+recommend the use of a LaTeX viewer for Github.
+
++---------+-------------------------------------------+
+| Version | Comments                                  |
++=========+===========================================+
+| 1.0.0   | First productive version.                 |
++---------+-------------------------------------------+
+| 1.0.1   | No code changes, version to generate DOI. |
++---------+-------------------------------------------+
 
 .. _repository: https://github.com/DanielRobertNicoud/dupont-contraction
 """
