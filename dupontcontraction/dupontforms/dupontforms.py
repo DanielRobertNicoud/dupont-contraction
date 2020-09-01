@@ -260,6 +260,17 @@ class DupontForm:
         Sum of scalar with form.
         """
         return DupontForm(self.n, {'': other}) + self
+    
+    def d(self):
+        """
+        Differential of Dupont form.
+        """
+        out_n = self.n
+        out_form = DupontForm.zero(out_n)
+        for w, c in self.form.items():
+            for i in range(out_n + 1):
+                out_form += DupontForm(out_n, {f"{i}|{w}": c})
+        return out_form
         
         
     def i(self):

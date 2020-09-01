@@ -1,12 +1,28 @@
 # Dupont contraction
 
+**Author:** Daniel Robert-Nicoud<br>
+**Contact:** daniel.robertnicoud@gmail.com
+
+**Table of contents**
+* [Mathematical objects](#mathematicalobjects)
+* [Classes](#classes)
+    * [DupontForms](#classdupont)
+    * [SullivanForms](#classsullivan)
+* [References](#references)
+
 This package provides tools to work and do explicit computations on Sullivan and Dupont forms, as well as calculating the action of the various maps involved in the Dupont contraction and the transferred structure from the Sullivan algebra (a commutative algebra) to the Dupont algebra (which receives the structure of a commutative algebra up to homotopy).
 
-# Classes
+We work in the homological convention over the field $\mathbb{Q}$ of rational numbers.
 
-## DupontForm
+# Mathematical objects <a name="mathematicalobjects"></a>
 
-Implements the Dupont forms $C_\bullet$, given by the cellular cochains on the simplices. The Dupont forms in simplicial degree n form a chain complex with basis $\omega_{i_0|...|i_k}$ (of degree k), where $0\le i_0 < i_1 < ... < i_k \le n$, representing the sub-simplex of the n-simplex spanned by $i_0, ..., i_k$.
+TBD
+
+# Classes <a name="classes"></a>
+
+## DupontForm <a name="classdupont"></a>
+
+Implements the Dupont forms $C_\bullet$, given by the cellular cochains on the simplices. The Dupont forms in simplicial degree n form a chain complex with basis $\omega_{i_0|...|i_k}$ for each non-empty sequence $0\le i_0 < i_1 < ... < i_k \le n$, representing the sub-simplex of the n-simplex spanned by $i_0, ..., i_k$. The form $\omega_{i_0|...|i_k}$ has degree $1-k$.
 
 ### Constructors
 
@@ -22,14 +38,16 @@ The following basic operations are supported:
 * sum of Dupont forms (`+`, `sum`),
 * comparison of Dupont forms (`==`).
 * `tree_product(tree)`: transferred $\Omega\mathrm{BCom}$ structure on Dupont forms from the Sullivan forms via the Dupont contraction. The generating operations f this structure are indexed by rooted trees. This function does not encode the abstract operation but calculates it on arguments directly. Its argument represents a planar tree with Dupont forms at the leaves by writing it as a nested list of Dupont forms. For example, `[[w0, w01], w012, [w2, w12]]` for `w0` given by $\omega_0$ and so on, represents the tree with a 3-corolla at the root, with at its leaves the 2-corolla with $\omega_0$ and $\omega_{0|1}$ at the leaves, the Dupont form $\omega_{0|1|2}$, and the 2-corolla with $\omega_2$ and $\omega_{1|2}$ at the leaves.
-* `a_infinity_product(*args)`: transferred $\mathscr{C}_\infty$ structure on Dupont forms from the Sullivan forms via the Dupont contraction.
+* `a_infinity_product(*args)`: transferred homotopy commutative structure on Dupont forms from the Sullivan forms via the Dupont contraction.
 By Cheng-Getzler, equivalently we only give the transferred $\mathscr{A}_\infty$ structure. The arguments `args` are Dupont forms.<br>Warning: This can be very slow for high arities as the function `SullivanForm.reduce()` needs to be called on complex Sullivan forms.
 
 ### Class methods
 
-* `i()` returns the image of the Dupont form in the Sullivan complex.
+* `d()`: differential of a Dupont form. For `w` a Dupont form we have
+`w.d() == w.i().d().p()`.
+* `i()`: image of the Dupont form in the Sullivan complex.
 
-## SullivanForm
+## SullivanForm <a name="classsullivan"></a>
 
 Implements the Sullivan forms, given by the polynomial differential forms on the simplices. In simplicial degree n they are given by the dg commutative algebra $\mathbb{Q}[t_0, ..., t_n, dt_1, ..., dt_n]/\sim$, where the equivalence relation is given by $t_0 + ... + t_n \sim 1$ and $dt_0 + ... + dt_n \sim 0$.
 
@@ -51,15 +69,12 @@ The following basic operations are supported:
 
 ### Class methods
 
+* `d()`: differential of a Sullivan form.
 * `reduce(eliminate=0)`: using the algebraic relations, simplifies the Sullivan form by eliminating completely $t_{\text{eliminate}}$ from the expression.
 * `p()`: projection from Sullivan forms to Dupont forms.
 * `h()`: contraction of Sullivan forms.
 
-# References
+# References <a name="references"></a>
 
 1. X. Z. Cheng and E. Getzler. <i>Transferring homotopy commutative algebraic structures</i>. Journal of Pure and Applied Algebra, 212:2535–2542, 2008. [arXiv:math/0610912](https://arxiv.org/pdf/math/0610912.pdf).
 2. L. Lunardon. <i>Some remarks on Dupont contraction</i>. [arXiv:1807.02517](https://arxiv.org/pdf/1807.02517.pdf).
-
-# Credits
-
-Developer and maintainer: Daniel Robert-Nicoud

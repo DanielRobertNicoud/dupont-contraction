@@ -1,7 +1,9 @@
 import setuptools
 
-with open('README.md', 'r') as f:
-    long_description = f.read()
+long_description = """
+Please find the package documentation in the original 
+`Github repository<http://www.python.org/>`_.
+"""
     
 setuptools.setup(
     name='dupont-contraction',
@@ -10,9 +12,7 @@ setuptools.setup(
     author_email='daniel.robertnicoud@gmail.com',
     description="A package for Sullivan and Dupont forms, and the Dupont " \
         "contraction",
-# =============================================================================
-#     long_description=long_description,
-# =============================================================================
+    long_description=long_description,
     url='https://github.com/DanielRobertNicoud/dupont-contraction',
     install_requires=[
         'numpy'
