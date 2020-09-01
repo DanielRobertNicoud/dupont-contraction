@@ -1,5 +1,7 @@
 # Dupont contraction
 
+[![DOI](https://zenodo.org/badge/289950438.svg)](https://zenodo.org/badge/latestdoi/289950438)
+
 **Author:** Daniel Robert-Nicoud<br>
 **Contact:** daniel.robertnicoud@gmail.com
 
