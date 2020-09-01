@@ -41,10 +41,7 @@ rational homotopy theory.
 
 Dupont defined a simplicial sub-complex $C_\bullet$ of the Sullivan forms as the chain
 complex spanned by the forms
-\[
-\omega_{i_0|\ldots|i_k} = \sum_{j=1}^n(-1)^jt_{i_j}dt_{i_0}\cdots\widehat{dt_{i_j}}
-\cdots dt_{i_k}
-\]
+$$\omega_{i_0|\ldots|i_k} = \sum_{j=1}^n(-1)^jt_{i_j}dt_{i_0}\cdots\widehat{dt_{i_j}}\cdots dt_{i_k}$$
 for $0\le i_0 < i_1 < \ldots < i_k \le n$.
 
 This is nothing else than the (co)cellular complex of the $n$-simplex, with the
@@ -54,7 +51,7 @@ vertices $i_0, \ldots, i_k$.
 Dupont additionally showed that there exists a simplicial contraction from the
 Sullivan forms to the Dupont forms, i.e. three simplicial maps
 $i:C_\bullet\to\Omega_\bullet$, $p:\Omega_\bullet\to C_\bullet$ and
-$h:\Omega_\bullet\to\Omega_bullet$ satisfying certain relations, such as
+$h:\Omega_\bullet\to\Omega_\bullet$ satisfying certain relations, such as
 $pi = \mathrm{id}$ and $ip - \mathrm{id} = dh + hd$.
 
 ## Transferred algebraic structures <a name="transferredstructures"></a>
