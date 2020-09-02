@@ -17,7 +17,7 @@
 
 This package provides tools to work and do explicit computations on Sullivan and Dupont forms, as well as calculating the action of the various maps involved in the Dupont contraction and the transferred structure from the Sullivan algebra (a commutative algebra) to the Dupont algebra (which receives the structure of a commutative algebra up to homotopy).
 
-Install this package from [PyPi](https://pypi.org/project/dupont-contraction/1.0.0/): `pip install dupont-contraction`<br>
+Install this package from [PyPi](https://pypi.org/project/dupont-contraction/): `pip install dupont-contraction`<br>
 Use this package in your code: `import dupontcontraction`
 
 # Mathematical objects <a name="mathematicalobjects"></a>
@@ -76,6 +76,8 @@ permutations.
 
 ## DupontForm <a name="classdupont"></a>
 
+`from dupontcontraction.dupontforms.dupontforms import DupontForm`
+
 Implements the Dupont forms $C_\bullet$, given by the cellular cochains on the simplices.
 
 ### Constructors
@@ -101,6 +103,8 @@ The following basic operations are supported:
 * `i()`: image of the Dupont form in the Sullivan complex.
 
 ## SullivanForm <a name="classsullivan"></a>
+
+`from dupontcontraction.sullivanforms.sullivanforms import SullivanForm`
 
 Implements the Sullivan forms, given by the polynomial differential forms on the simplices.
 
@@ -129,5 +133,8 @@ The following basic operations are supported:
 
 # References <a name="references"></a>
 
-1. X. Z. Cheng and E. Getzler. <i>Transferring homotopy commutative algebraic structures</i>. Journal of Pure and Applied Algebra, 212:2535–2542, 2008. [arXiv:math/0610912](https://arxiv.org/pdf/math/0610912.pdf).
+1. A. K. Bousfield and V. K. A. M.  Guggenheim. <i>On PL de Rham theory and rational homotopy theory</i>. Mem.
+Amer. Math. Soc., 8, 1976.
+2. X. Z. Cheng and E. Getzler. <i>Transferring homotopy commutative algebraic structures</i>. Journal of Pure and Applied Algebra, 212:2535–2542, 2008. [arXiv:math/0610912](https://arxiv.org/pdf/math/0610912.pdf).
 2. L. Lunardon. <i>Some remarks on Dupont contraction</i>. [arXiv:1807.02517](https://arxiv.org/pdf/1807.02517.pdf).
+3. D. Sullivan. <i>Infinitesimal computations in topology</i>. Inst. Hautes Études Sci. Publ. Math., (47):269–331, 1978.

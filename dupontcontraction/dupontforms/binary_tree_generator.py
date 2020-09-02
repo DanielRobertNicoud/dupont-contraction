@@ -45,7 +45,7 @@ def binary_tree_generator(arity, shift=0):
                     binary_tree_generator(n1, shift=shift),
                     binary_tree_generator(n2, shift=n1 + shift)
                     ):
-                yield (-s1*s2*(-1)**n1, [t1, t2], [arity, a1, a2])
+                yield (s1*s2*(-1)**n1, [t1, t2], [arity, a1, a2])
 
 
 def map_args(tree, args):
