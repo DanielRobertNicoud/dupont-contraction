@@ -11,7 +11,7 @@ recommend the use of a LaTeX viewer for Github.
 +---------+-------------------------------------------+
 | 1.0.1   | No code changes, version to generate DOI. |
 +---------+-------------------------------------------+
-| 1.0.2   | Minor changes/bug fixes:                            |
+| 1.0.2   | Minor changes/bug fixes:                  |
 |         |                                           |
 |         | - Fixed sign error in a_infinity_product. |
 |         | - Improved README.md                      |
