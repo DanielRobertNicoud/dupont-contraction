@@ -1,8 +1,16 @@
 import setuptools
 
 long_description = """
-Please find the package documentation in the original Github repository_. We 
-recommend the use of a LaTeX viewer for Github.
+This package provides tools to work with Sullivan forms, Dupont forms, and the
+Dupont contraction from Sullivan to Dupont forms. In particular, it allows for
+the computation of the transferred homotopy commutative structure on Dupont
+forms.
+
+Please find the full package documentation in the original Github repository_.
+We recommend the use of a LaTeX viewer for Github.
+
+|
+|
 
 +---------+-------------------------------------------+
 | Version | Comments                                  |
