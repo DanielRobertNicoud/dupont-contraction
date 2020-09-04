@@ -170,7 +170,7 @@ Project $x$ to the Dupont complex (`\frac{1}{48}\omega_{0|1|2}`).
 
     print(x.p())
 
-Calculate the $\mathcal{A}_\infty$ product $m_43(\omega_{01}, \omega_{01}, \omega_1)$, giving `-\frac{1}{12}\omega_{0|1}`.
+Calculate the homotopy associative product $m_3(\omega_{01}, \omega_{01}, \omega_1)$, giving `-\frac{1}{12}\omega_{0|1}`.
 
 print(DupontForm.a_infinity_product(w01, w01, w1))
 
