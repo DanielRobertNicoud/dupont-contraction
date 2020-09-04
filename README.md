@@ -13,6 +13,7 @@
 * [Classes](#classes)
     * [DupontForms](#classdupont)
     * [SullivanForms](#classsullivan)
+    * [Examples](#examples)
 * [References](#references)
 
 This package provides tools to work and do explicit computations on Sullivan and Dupont forms, as well as calculating the action of the various maps involved in the Dupont contraction and the transferred structure from the Sullivan algebra (a commutative algebra) to the Dupont algebra (which receives the structure of a commutative algebra up to homotopy).
@@ -130,6 +131,48 @@ The following basic operations are supported:
 * `reduce(eliminate=0)`: using the algebraic relations, simplifies the Sullivan form by eliminating completely $t_{\text{eliminate}}$ from the expression.
 * `p()`: projection from Sullivan forms to Dupont forms.
 * `h()`: contraction of Sullivan forms.
+
+## Examples <a name="examples"></a>
+
+Import classes.
+
+    from dupontcontraction.sullivanforms.sullivanforms import SullivanForm
+    from dupontcontraction.dupontforms.dupontforms import DupontForm
+
+Construct the Sullivan form $x = t_1^2t_2 + \tfrac{1}{2}t_0dt_1\in\Omega_2$.
+
+    x = SullivanForm(2, {'': {'0|2|1': '1'}, '0|1': {'1|1|0': '1/2'}})
+
+Construct the Dupont forms $\omega_1, \omega_{0|1}\in C_2$.
+
+    w1 = DupontForm(2, {'1': 1})
+    w01 = DupontForm(2, {'0|1': 1})
+
+Print the LaTeX representation of `x`, outputting the string `t_{1}^{2}t_{2} + \frac{1}{2}t_{0}t_{1}dt_{0}dt_{1}`. Note: `print(x)` gives the same output.
+
+    print(repr(x))
+
+Print the LaTeX representation of `w01` (giving `\omega_{0|1}`), embeds `w01` into the Sullivan algebra, and prints its representation (`t_{0}dt_{1} - t_{1}dt_{0}`).
+
+    print(w01)
+    print(w01.i())
+
+Add `w1` and `w01` in the Dupont complex and print the representation (`\omega_{1} + \omega_{0|1}`).
+
+    print(w0 + w01)
+
+Multiply `x` by `w1`, giving `t_{1}^{3}t_{2} + \frac{1}{2}t_{0}t_{1}^{2}dt_{0}dt_{1}`, and then give the equivalent representation obtained eliminating $t_2$ (`\left(-t_{0}t_{1}^{3} - t_{1}^{4} + t_{1}^{3}\right) + \frac{1}{2}t_{0}t_{1}^{2}dt_{0}dt_{1}`).
+
+    print(x*w1.i())
+    print((x*w1.i()).reduce(eliminate=2))
+
+Project $x$ to the Dupont complex (`\frac{1}{48}\omega_{0|1|2}`).
+
+    print(x.p())
+
+Calculate the $\mathcal{A}_\infty$ product $m_43(\omega_{01}, \omega_{01}, \omega_1)$, giving `-\frac{1}{12}\omega_{0|1}`.
+
+print(DupontForm.a_infinity_product(w01, w01, w1))
 
 # References <a name="references"></a>
 
