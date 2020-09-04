@@ -139,7 +139,7 @@ Import classes.
     from dupontcontraction.sullivanforms.sullivanforms import SullivanForm
     from dupontcontraction.dupontforms.dupontforms import DupontForm
 
-Construct the Sullivan form $x = t_1^2t_2 + \tfrac{1}{2}t_0dt_1\in\Omega_2$.
+Construct the Sullivan form $x = t_1^2t_2 + \tfrac{1}{2}dt_0dt_1\in\Omega_2$.
 
     x = SullivanForm(2, {'': {'0|2|1': '1'}, '0|1': {'1|1|0': '1/2'}})
 
