@@ -414,6 +414,7 @@ class SullivanForm:
         
         return True
     
+    
     def d(self):
         """
         Differential.
@@ -446,16 +447,70 @@ class SullivanForm:
                     )
         
         return out_form
+    
+    
+    def _h1(self, k):
+        
+        out_n = self.n
+        out_form = SullivanForm.zero(out_n)
+        
+        for dx, p in self.form.items():
+            if dx == '':
+                continue
+            # split dx in its components and check if dx_k is present
+            # if not: this contributes 0
+            split_dx = [int(i) for i in dx.split('|')]
+            if k not in split_dx:
+                continue
+            # if it is present, separate the monomials into the part with all
+            # the terms with k and all the other terms
+            idx = split_dx.index(k)
+            # sign to move dx_k out to the left
+            sign = (-1)**idx
+            dx_no_k = '|'.join([str(i) for i in split_dx[:idx] + split_dx[idx + 1:]])
+            # work on single monomials
+            for m, c in p.items():
+                split_m = m.split('|')
+                # monomial without k
+                m_no_k = split_m[:]
+                m_no_k[k - 1] = '0'
+                m_no_k = '|'.join(m_no_k)
+                # only k part
+                e = int(split_m[k - 1])  # exponent of x_k
+                # apply h1 to the x_k part:
+                # x^e -> x^(e+1)/(e+1) - x/(e+1)
+                mk1 = ['0'] * out_n
+                mk1[k - 1] = str(e + 1)
+                mk1 = '|'.join(mk1)
+                mk2 = ['0'] * out_n
+                mk2[k - 1] = '1'
+                mk2 = '|'.join(mk2)
+                ck = fractions.Fraction(1, e + 1)
+                # integrated form
+                int_form = (SullivanForm(out_n, {'': {mk1: ck}}) -
+                            SullivanForm(out_n, {'': {mk2: ck}}))
+                
+                out_form += (
+                    int_form * SullivanForm(out_n, {dx_no_k: {m_no_k: sign*c}})
+                )
+        return out_form
 
 
 if __name__ == '__main__':
-    sf1 = SullivanForm(2,
-                       {'2|1': {'0|3': 1}, '': {'1|0': -2}, '1': {'0|0': -1}})
-    sf2 = SullivanForm(2, {'1|2': {'0|2': -3, '0|3':2}})
-    print(sf1)
-    print(sf2)
-    print(sf1 + sf2)
-    print(-sf1)
-    print(sf1 * sf1)
-    print(sf1.d())
+# =============================================================================
+#     sf1 = SullivanForm(2,
+#                        {'2|1': {'0|3': 1}, '': {'1|0': -2}, '1': {'0|0': -1}})
+#     sf2 = SullivanForm(2, {'1|2': {'0|2': -3, '0|3':2}})
+#     print(sf1)
+#     print(sf2)
+#     print(sf1 + sf2)
+#     print(-sf1)
+#     print(sf1 * sf1)
+#     print(sf1.d())
+# =============================================================================
+    
+    sf3 = SullivanForm(2, {'2|1': {'0|3': 1}})
+    print(sf3)
+    print(sf3._h1(1))
+    print(sf3._h1(2))
     
