@@ -223,9 +223,9 @@ class SullivanForm:
                     
                 for j, e in enumerate(m.split('|')):
                     if e == '1':
-                        p += f"x_{{{j}}}"
+                        p += f"x_{{{j + 1}}}"
                     elif e != '0':
-                        p += f"x_{{{j}}}^{{{e}}}"
+                        p += f"x_{{{j + 1}}}^{{{e}}}"
                         
             if len(p) > 0:
                 if n_monomials > 1:
@@ -305,6 +305,147 @@ class SullivanForm:
             self.n,
             {dt: {m: -c for m, c in p.items()} for dt, p in self.form.items()}
         )
+    
+    
+    def __sub__(self, other):
+        return self + (-other)
+    
+    
+    def __mul__(self, sf):
+        """
+        Product of two Sullivan forms.
+
+        Parameters
+        ----------
+        sf : SullivanForm
+
+        Raises
+        ------
+        TypeError
+            If simplicial dimensions are incompatible.
+
+        Returns
+        -------
+        SullivanForm
+            Product.
+
+        """
+        # check same simplicial dimension
+        if self.n != sf.n:
+            raise TypeError('Sullivan forms need to have the same simplicial'
+                             ' dimension to be multiplied together.')
+        
+        # case where one of the forms is zero
+        if self.is_zero or sf.is_zero:
+            return SullivanForm(self.n, {})
+        
+        # actual multiplication
+        n_out = self.n
+        form_out = {}
+        # pairs of dt_i combinations
+        for dt1, dt2 in it.product(self.form, sf.form):
+            dt1_split, dt2_split = dt1.split('|'), dt2.split('|')
+            if dt1 == '':
+                dt1_split = []
+            if dt2 == '':
+                dt2_split = []
+            
+            # if dt1 and dt2 have common element, we get zero
+            if not set(dt1_split).isdisjoint(dt2_split):
+                continue
+            # otherwise the resulting dt is the union of the two and the
+            # polynomial is the product of polynomials
+            dt = '|'.join(dt1_split + dt2_split)
+            p = caf._multiply_polynomials(self.form[dt1], sf.form[dt2])
+            
+            if dt in form_out:
+                form_out[dt] = caf._add_polynomials(form_out[dt], p)
+            else:
+                form_out[dt] = p
+            
+            if not form_out[dt]:
+                del form_out[dt]
+        
+        return SullivanForm(n_out, form_out)
+    
+    
+    def __rmul__(self, other):
+        """
+        Scalar multiplication of Sullivan form.
+
+        Parameters
+        ----------
+        other : int or Fraction
+            Scalar.
+
+        Returns
+        -------
+        TYPE
+            DESCRIPTION.
+
+        """
+        return SullivanForm(
+            self.n,
+            {dt: {m: other*c for m, c in p.items()} \
+             for dt, p in self.form.items()}
+        )
+    
+    
+    def __eq__(self, other):
+        """
+        Check for equality of Sullivan forms. Since we work in free algebras in
+        the cubical case, we only need to compare the coefficients of the
+        monomials.
+        """
+        
+        for dt, p in self.form.items():
+            if dt not in other.form:
+                return False
+            for m, c in p.items():
+                if m not in other.form[dt] or c != other.form[dt][m]:
+                    return False
+        
+        for dt, p in other.form.items():
+            if dt not in self.form:
+                return False
+            for m, c in p.items():
+                if m not in self.form[dt] or c != self.form[dt][m]:
+                    return False
+        
+        return True
+    
+    def d(self):
+        """
+        Differential.
+        """
+        out_n = self.n
+        out_form = SullivanForm.zero(out_n)
+        
+        for dx, p in self.form.items():
+            for m, c in p.items():
+                # d(monomial)
+                split_m = [int(e) for e in m.split('|')]
+                for i, e in enumerate(split_m):
+                    if e == 0:
+                        continue
+                    
+                    aux_split_m = [*split_m]
+                    aux_split_m[i] -= 1
+                    
+                    aux_m = '|'.join([str(x) for x in aux_split_m])
+                    aux_c = c * e
+                    if dx == '':
+                        aux_dx = str(i + 1)
+                    else:
+                        aux_dx = f"{i + 1}|{dx}"
+                    
+                    # add term to final form
+                    out_form += SullivanForm(
+                        out_n,
+                        {aux_dx: {aux_m: aux_c}}
+                    )
+        
+        return out_form
 
 
 if __name__ == '__main__':
@@ -315,4 +456,6 @@ if __name__ == '__main__':
     print(sf2)
     print(sf1 + sf2)
     print(-sf1)
+    print(sf1 * sf1)
+    print(sf1.d())
     
