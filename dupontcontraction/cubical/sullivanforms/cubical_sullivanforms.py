@@ -450,6 +450,21 @@ class SullivanForm:
     
     
     def _h1(self, k):
+        """
+        Apply h_1 to the variable x_k. This is one of the building blocks of
+        the Dupont-Getzler contraction.
+
+        Parameters
+        ----------
+        k : int
+            Index of the variable to integrate.
+
+        Returns
+        -------
+        out_form : cubical.SullivanForm
+            Integrated form.
+
+        """
         
         out_n = self.n
         out_form = SullivanForm.zero(out_n)
