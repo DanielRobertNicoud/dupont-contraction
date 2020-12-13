@@ -18,8 +18,8 @@ sys.path.append(
     )
 )
 
-import dupontcontraction.sullivanforms.sullivanforms as sf
-import dupontcontraction.dupontforms.binary_tree_generator as btg
+import dupontcontraction.simplicial.sullivanforms.sullivanforms as sf
+import dupontcontraction.simplicial.dupontforms.binary_tree_generator as btg
 
 class DupontForm:
     

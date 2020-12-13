@@ -21,8 +21,8 @@ sys.path.append(
     )
 )
 
-from dupontcontraction.sullivanforms import auxiliary_functions as af
-from dupontcontraction.dupontforms import dupontforms as duf
+from dupontcontraction.simplicial.sullivanforms import auxiliary_functions as af
+from dupontcontraction.simplicial.dupontforms import dupontforms as duf
 
 class SullivanForm:
     
@@ -57,8 +57,6 @@ class SullivanForm:
         ------
         TypeError
             For mis-specified parameters.
-        Exception
-            DESCRIPTION.
 
         Returns
         -------
@@ -160,7 +158,7 @@ class SullivanForm:
     
     def copy(self):
         """
-        Method to replace reliance on deepcopy.
+        Copy form.
 
         Returns
         -------
@@ -246,6 +244,8 @@ class SullivanForm:
                             r += ' + '
                         r += f"{p}"
             if ds:
+                if k > 0 and len(p) == 0:
+                    r += ' + '
                 for i in ds.split('|'):
                     r += f"dt_{{{i}}}"
                 

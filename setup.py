@@ -28,13 +28,17 @@ We recommend the use of a LaTeX viewer for Github.
 |         | import from `dupontcontraction.simplicial` (in preparation for    |
 |         | cubical version; to come in a future version).                    |
 +---------+-------------------------------------------------------------------+
+| 2.1.0   | (BLA)                                                             |
+|         | Other changes/bug fixes:                                          |
+|         | - Fixed bug in __repr__.                                          |
++---------+-------------------------------------------------------------------+
 
 .. _repository: https://github.com/DanielRobertNicoud/dupont-contraction
 """
     
 setuptools.setup(
     name='dupont-contraction',
-    version='2.0.0',
+    version='2.1.0',
     author='Daniel Robert-Nicoud',
     author_email='daniel.robertnicoud@gmail.com',
     description="A package for computations using Sullivan and Dupont forms," \
@@ -42,6 +46,8 @@ setuptools.setup(
     long_description=long_description,
     url='https://github.com/DanielRobertNicoud/dupont-contraction',
     install_requires=[
+        'fractions',
+        'itertools',
         'numpy'
     ],
     packages=setuptools.find_packages(),
