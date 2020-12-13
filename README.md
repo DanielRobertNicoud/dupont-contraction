@@ -77,7 +77,7 @@ permutations.
 
 ## DupontForm <a name="classdupont"></a>
 
-`from dupontcontraction.dupontforms.dupontforms import DupontForm`
+`from dupontcontraction.simplicial import DupontForm`
 
 Implements the Dupont forms $C_\bullet$, given by the cellular cochains on the simplices.
 
@@ -105,7 +105,7 @@ The following basic operations are supported:
 
 ## SullivanForm <a name="classsullivan"></a>
 
-`from dupontcontraction.sullivanforms.sullivanforms import SullivanForm`
+`from dupontcontraction.simplicial import SullivanForm`
 
 Implements the Sullivan forms, given by the polynomial differential forms on the simplices.
 
@@ -136,8 +136,8 @@ The following basic operations are supported:
 
 Import classes.
 
-    from dupontcontraction.sullivanforms.sullivanforms import SullivanForm
-    from dupontcontraction.dupontforms.dupontforms import DupontForm
+    from dupontcontraction.simplicial import SullivanForm
+    from dupontcontraction.simplicial import DupontForm
 
 Construct the Sullivan form $x = t_1^2t_2 + \tfrac{1}{2}dt_0dt_1\in\Omega_2$.
 
