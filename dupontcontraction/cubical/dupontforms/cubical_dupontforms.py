@@ -16,7 +16,7 @@ sys.path.append(
 )
 
 from cubical.signed_ordered_set import SignedOrderedSet
-from cubical.sullivanforms.cubical_sullivanforms import SullivanForm
+import cubical.sullivanforms.cubical_sullivanforms as csf
 
 
 class DupontForm:
@@ -62,7 +62,11 @@ class DupontForm:
             for k, c in form.items():
                 I, J = k.split(',')
                 
-                I = [int(i) for i in I.split('|')]
+                if I != '':
+                    I = [int(i) for i in I.split('|')]
+                else:
+                    I = []
+                    
                 for i in I:
                     if i <= 0 or i > n or not isinstance(i, int):
                         raise TypeError('Invalid form')
@@ -77,7 +81,7 @@ class DupontForm:
                 for j in J:
                     if j not in '01':
                         raise TypeError('Invalid form')
-                
+                        
                 key = f"{str(I)},{J}"
                 coeff = sign*fractions.Fraction(c)
                 
@@ -145,7 +149,12 @@ class DupontForm:
             else:
                 r += f"\\frac{{{abs(c.numerator)}}}{{{c.denominator}}}"
             
-            r += f"\\omega_{{{k}}}"
+            if k[0] != ',' and k[-1] != ',':
+                r += f"\\omega_{{{k}}}"
+            elif k[-1] != ',':
+                r += f"\\omega_{{\\emptyset{k}}}"
+            else:
+                r += f"\\omega_{{{k}\\emptyset}}"
         
         return r
     
@@ -204,7 +213,6 @@ class DupontForm:
                     del out_form[w]
             else:
                 out_form[w] = c
-        
         return DupontForm(self.n, out_form)
     
     def d(self):
@@ -225,7 +233,7 @@ class DupontForm:
                 out_I = '|'.join([str(y) for y in 
                                   I[:i - 1 - cnt] + [i] + I[i - 1 - cnt:]])
                 out_J = ''.join([str(z) for z in J[:cnt] + J[cnt + 1:]])
-                print({f"{out_I},{out_J}": sign * c})
+                
                 out_form += DupontForm(out_n, {f"{out_I},{out_J}": sign * c})
         
         return out_form
@@ -236,11 +244,11 @@ class DupontForm:
         Map i of the contraction, returns a SullivanForm.
         """
         out_n = self.n
-        out_form = SullivanForm(out_n, dict())
+        out_form = csf.SullivanForm(out_n, dict())
         
         for k, c in self.form.items():
             I, J = k.split(',')
-            dx = SullivanForm(out_n, {I: {'|'.join(['0'] * out_n): 1}})
+            dx = csf.SullivanForm(out_n, {I: {'|'.join(['0'] * out_n): c}})
             
             I = I.split('|')
             
@@ -251,9 +259,9 @@ class DupontForm:
                     j = J.pop()
                     
                     if j == '0':
-                        dx *= SullivanForm(out_n, f"x_{i}")
+                        dx *= csf.SullivanForm(out_n, f"x_{i}")
                     else:
-                        dx *= SullivanForm(out_n, f"1 - x_{i}")
+                        dx *= csf.SullivanForm(out_n, f"1 - x_{i}")
             
             out_form += dx
         
@@ -261,19 +269,11 @@ class DupontForm:
 
 
 if __name__ == '__main__':
-    df1 = DupontForm(4, {'2|4,01': '1/2'})
-    df2 = DupontForm(4, {'4|2,01': '1/2'})
-    df3 = DupontForm(4, {'2|4,01': '1/2', '4|2,01': '1/2'})
-    df4 = DupontForm(4, {'1|2,00': '-3/4', '3,010': '1/2'})
+    df1 = DupontForm(3, {'1|2,0': 1})
+    df2 = DupontForm(3, {'1|3,0': 1})
+    df3 = DupontForm(3, {'3,01': 1})
     
-    print(df1)
-    print(df2)
-    print(df3)
-    print(df4)
-    print(df1 + df2)
-    print(df1 + df4)
-    print(2 * df1)
-    print(df1.d())
-    print(df1.i())
-    print(df4.i())
-            
+    print((df1.i() * df2.i()).p())
+    print(df1.i() * df3.i())
+    print((df1.i() * df3.i()).p())
+    

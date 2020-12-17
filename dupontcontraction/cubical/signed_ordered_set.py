@@ -59,6 +59,9 @@ class SignedOrderedSet():
     
     
     def __iter__(self):
+        if self.start is None:
+            return
+        
         curr = self.start
         while curr != self.end:
             yield curr

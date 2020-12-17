@@ -19,6 +19,7 @@ sys.path.append(
 )
 
 from cubical.sullivanforms import cubical_auxiliary_functions as caf
+import cubical.dupontforms.cubical_dupontforms as cdf
 
 class SullivanForm:
     
@@ -166,10 +167,10 @@ class SullivanForm:
             
             if form[0] == '-':
                 factors = [SullivanForm(n, f) for f in factors[1:]]
-                factors[0] = -factors[0]
             else:
                 factors = [SullivanForm(n, f) for f in factors]
-            return sum(factors)
+                factors[0] = - factors[0]
+            return -sum(factors)
         
         # products
         if '*' in form:
@@ -574,28 +575,49 @@ class SullivanForm:
                     int_form * SullivanForm(out_n, {dx_no_k: {m_no_k: sign*c}})
                 )
         return out_form
+    
+    def p(self):
+        """
+        Apply p to the form.
 
+        Returns
+        -------
+        out_form : cubical.DupontForm
+            Projected form.
+
+        """
+        
+        out_n = self.n
+        out_form = cdf.DupontForm.zero(out_n)
+        
+        for dx, p in self.form.items():
+            I = dx
+            
+            if dx != '':
+                dx = [int(i) for i in dx.split('|')]
+            else:
+                dx = []
+                
+            for m, c in p.items():
+                J = ''
+                for i, e in enumerate([int(x) for x in m.split('|')]):
+                    i = i + 1
+                    if i in dx:
+                        c *= 1 / (e + 1)
+                    elif e == 0:
+                        J += '0'
+                    else:
+                        J += '1'
+                out_form += cdf.DupontForm(out_n, {f"{I},{J}": c})
+        
+        return out_form
+                        
+        
 
 if __name__ == '__main__':
-# =============================================================================
-#     sf1 = SullivanForm(2,
-#                        {'2|1': {'0|3': 1}, '': {'1|0': -2}, '1': {'0|0': -1}})
-#     sf2 = SullivanForm(2, {'1|2': {'0|2': -3, '0|3':2}})
-#     print(sf1)
-#     print(sf2)
-#     print(sf1 + sf2)
-#     print(-sf1)
-#     print(sf1 * sf1)
-#     print(sf1.d())
-# =============================================================================
+    sf1 = SullivanForm(3, {'': {'0|2|1': 3}, '1': {'1|0|0': 2}})
+    print(sf1)
+    print(sf1.p())
     
-# =============================================================================
-#     sf3 = SullivanForm(2, {'2|1': {'0|3': 1}})
-#     print(sf3)
-#     print(sf3._h1(1))
-#     print(sf3._h1(2))
-# =============================================================================
-
-    #sf4 = SullivanForm(3, 'dx_3')
-    sf5 = SullivanForm(2, '-x_2^2 * x_1 * dx_1 + dx_2 - x_1')
-    
+    sf2 = SullivanForm(3, '1 - x_1')
+    print(sf2)
