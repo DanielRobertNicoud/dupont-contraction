@@ -261,6 +261,7 @@ class DupontForm:
         """
         return DupontForm(self.n, {'': other}) + self
     
+    
     def d(self):
         """
         Differential of Dupont form.

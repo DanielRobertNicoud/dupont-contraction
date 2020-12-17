@@ -81,3 +81,11 @@ class SignedOrderedSet():
         out = self._sign
         self._sign = 1
         return out
+    
+    
+    def __repr__(self):
+        return '|'.join([str(el) for el in self])
+    
+    
+    def __contains__(self, el):
+        return el in self.set

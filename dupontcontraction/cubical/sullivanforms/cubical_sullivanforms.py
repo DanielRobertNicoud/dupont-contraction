@@ -18,7 +18,7 @@ sys.path.append(
     )
 )
 
-from dupontcontraction.cubical.sullivanforms import cubical_auxiliary_functions as caf
+from cubical.sullivanforms import cubical_auxiliary_functions as caf
 
 class SullivanForm:
     
@@ -48,6 +48,12 @@ class SullivanForm:
                 of the form k_1|...|k_n where n is the dimension indicating a
                 monomial coeff*x_1^{k_1}...x_n^{k_n}, and the associated
                 element is the coefficient
+            For a string argument:
+                Only accepts sums (+ or -) of terms written as
+                    [coeff]*x_[j1]^[e1]*[...]*x_[jk]^[ek]*dx_[i1]*[...]*dx_[im]
+                Spaces are allowed around the operators.
+                Example:
+                    1/2 * x_2^3 * x_1^2 * x_4 * dx_2 - dx_1
 
         Raises
         ------
@@ -69,8 +75,8 @@ class SullivanForm:
         self.is_zero = False
         
         if isinstance(form, str):
-            raise NotImplementedError('string argument for form is not '
-                                      'implemented yet')
+            out_form = SullivanForm._from_string(n, form)
+            self.form = out_form.form
         
         if isinstance(form, dict):
             out_form = {}
@@ -145,11 +151,65 @@ class SullivanForm:
             
             return
     
+    
+    def _from_string(n, form):
+        # remove all spaces
+        form = form.replace(' ', '')
+        
+        # split +
+        if '+' in form:
+            return sum([SullivanForm(n, f) for f in form.split('+')])
+        
+        # split - (careful for - at the start)
+        if '-' in form:
+            factors = form.split('-')
+            
+            if form[0] == '-':
+                factors = [SullivanForm(n, f) for f in factors[1:]]
+                factors[0] = -factors[0]
+            else:
+                factors = [SullivanForm(n, f) for f in factors]
+            return sum(factors)
+        
+        # products
+        if '*' in form:
+            out_form = SullivanForm.one(n)
+            for x in [SullivanForm(n, f) for f in form.split('*')]:
+                out_form *= x
+            return out_form
+        
+        # dx
+        if form[0:2] == 'dx':
+            return SullivanForm(n, {form[3:]: {'|'.join(['0'] * n): 1}})
+        # x
+        elif form[0] == 'x':
+            if '^' in form:
+                x, e = form.split('^')
+            else:
+                x, e = form, '1'
+            i = int(x[2:]) - 1
+            I = ['0'] * n
+            I[i] = e
+            return SullivanForm(n, {'': {'|'.join(I): 1}})
+        # coefficient
+        else:
+            return fractions.Fraction(form) * SullivanForm.one(n)
+        
+        raise NotImplementedError('I cannot understand this string.')
+    
+    
     def zero(n):
         """
         The zero form.
         """
-        return SullivanForm(n, {})
+        return SullivanForm(n, dict())
+    
+    
+    def one(n):
+        """
+        The one form.
+        """
+        return SullivanForm(n, {'': {'|'.join(['0'] * n): '1'}})
     
     
     def copy(self):
@@ -208,7 +268,7 @@ class SullivanForm:
                     p += ' '
                     
                 if c == 1:
-                    if m == '|'.join(['0' for j in range(self.n + 1)]) \
+                    if m == '|'.join(['0' for j in range(self.n)]) \
                         and (ds == '' or len(monomials) > 1):
                         
                         p += '1'
@@ -289,6 +349,11 @@ class SullivanForm:
                 form_out[ds] = p
         
         return SullivanForm(n_out, form_out)
+    
+    def __radd__(self, other):
+        if other == 0:
+            return self
+        return self + other
     
     
     def __neg__(self):
@@ -524,8 +589,13 @@ if __name__ == '__main__':
 #     print(sf1.d())
 # =============================================================================
     
-    sf3 = SullivanForm(2, {'2|1': {'0|3': 1}})
-    print(sf3)
-    print(sf3._h1(1))
-    print(sf3._h1(2))
+# =============================================================================
+#     sf3 = SullivanForm(2, {'2|1': {'0|3': 1}})
+#     print(sf3)
+#     print(sf3._h1(1))
+#     print(sf3._h1(2))
+# =============================================================================
+
+    #sf4 = SullivanForm(3, 'dx_3')
+    sf5 = SullivanForm(2, '-x_2^2 * x_1 * dx_1 + dx_2 - x_1')
     
