@@ -8,6 +8,7 @@ import fractions
 import itertools as it
 import sys
 import os
+import math
 
 
 sys.path.append(
@@ -575,14 +576,13 @@ class SullivanForm:
                 
                 I = [int(i) for i in dx.split('|')]
                 for m, c in p.items():
-                    m = [int(e) for e in m.split('|')]
+                    m = [fractions.Fraction(e) for e in m.split('|')]
                     for cnt, i in enumerate(I):
                         # sign comes from Koszul
                         new_m = SullivanForm(out_n, f"{(-1)**cnt * c}")
                         
                         for j, e in enumerate(m):
                             j = j + 1
-                            e = fractions.Fraction(e)
                             if j < i and  j in I:
                                 new_m = (new_m *
                                          SullivanForm(out_n, f"{1/(e+1)}*dx_{j}")
@@ -614,8 +614,69 @@ class SullivanForm:
                         out_form += new_m
         
         if symmetric:
-            raise NotImplementedError()
-        
+            
+            # functions to apply p o i and identity
+            def _p1i1(e, j, is_dx):
+                if is_dx:
+                    return SullivanForm(out_n, f"{1/(e+1)}*dx_{j}")
+                if e == 0:
+                    return SullivanForm(out_n, f"1 - x_{j}")
+                return SullivanForm(out_n, f"x_{j}")
+            
+            
+            def _identity(e, j, is_dx):
+                if is_dx:
+                    return SullivanForm(out_n, f"x_{j}^{e}*dx_{j}")
+                return SullivanForm(out_n, f"x_{j}^{e}")
+            
+            
+            def _apply(flag, e, j, is_dx):
+                if flag == 0:
+                    return _identity(e, j, is_dx)
+                return _p1i1(e, j, is_dx)
+            
+            
+            def _h1(e, j):
+                return SullivanForm(out_n,
+                                    f"{1/(e+1)}*x_{j}^{e+1} -"
+                                    f" {1/(e+1)}*x_{j}")
+                
+            
+            for dx, p in self.form.items():
+                # degree 0 gives 0
+                if dx == '':
+                    continue
+                
+                I = [int(i) for i in dx.split('|')]
+                for m, c in p.items():
+                    m = [fractions.Fraction(e) for e in m.split('|')]
+                    for cnt, i in enumerate(I):
+                        # permutations
+                        for perm in it.product([0, 1], repeat=out_n - 1):
+                            # sign comes from Koszul
+                            new_m = SullivanForm(out_n, f"{(-1)**cnt * c}")
+                        
+                            # choice factor
+                            k = sum(perm)
+                            new_m = (math.factorial(k) *
+                                     math.factorial(out_n - k - 1) *
+                                     new_m)
+                            
+                            for j, flag in enumerate(perm):
+                                j = j + 1
+                                
+                                if j == i:
+                                    new_m = new_m * _h1(m[i - 1], i)
+                                
+                                if j < i:
+                                    e = m[j - 1]
+                                    new_m = new_m * _apply(flag, e, j, j in I)
+                                else:
+                                    e = m[j]
+                                    new_m = new_m * \
+                                        _apply(flag, e, j + 1, (j + 1) in I)
+                            out_form += new_m
+                            
         return out_form
                         
         
@@ -632,6 +693,6 @@ if __name__ == '__main__':
 
     sf3 = SullivanForm(3, "x_1*x_2^2*x_3*dx_1*dx_2")
     print(sf3)
-    print(sf3.h(symmetric=False))
-    print(sf3.h(symmetric=False).h(symmetric=False))
+    print(sf3.h())
+    print(sf3.h().h())
     print(sf3.d().h(symmetric=False) + sf3.h(symmetric=False).d() == (sf3 - sf3.p().i()))
