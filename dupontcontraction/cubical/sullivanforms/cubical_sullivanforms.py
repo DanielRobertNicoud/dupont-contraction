@@ -515,67 +515,6 @@ class SullivanForm:
         return out_form
     
     
-    def _h1(self, k):
-        """
-        Apply h_1 to the variable x_k. This is one of the building blocks of
-        the Dupont-Getzler contraction.
-
-        Parameters
-        ----------
-        k : int
-            Index of the variable to integrate.
-
-        Returns
-        -------
-        out_form : cubical.SullivanForm
-            Integrated form.
-
-        """
-        
-        out_n = self.n
-        out_form = SullivanForm.zero(out_n)
-        
-        for dx, p in self.form.items():
-            if dx == '':
-                continue
-            # split dx in its components and check if dx_k is present
-            # if not: this contributes 0
-            split_dx = [int(i) for i in dx.split('|')]
-            if k not in split_dx:
-                continue
-            # if it is present, separate the monomials into the part with all
-            # the terms with k and all the other terms
-            idx = split_dx.index(k)
-            # sign to move dx_k out to the left
-            sign = (-1)**idx
-            dx_no_k = '|'.join([str(i) for i in split_dx[:idx] + split_dx[idx + 1:]])
-            # work on single monomials
-            for m, c in p.items():
-                split_m = m.split('|')
-                # monomial without k
-                m_no_k = split_m[:]
-                m_no_k[k - 1] = '0'
-                m_no_k = '|'.join(m_no_k)
-                # only k part
-                e = int(split_m[k - 1])  # exponent of x_k
-                # apply h1 to the x_k part:
-                # x^e -> x^(e+1)/(e+1) - x/(e+1)
-                mk1 = ['0'] * out_n
-                mk1[k - 1] = str(e + 1)
-                mk1 = '|'.join(mk1)
-                mk2 = ['0'] * out_n
-                mk2[k - 1] = '1'
-                mk2 = '|'.join(mk2)
-                ck = fractions.Fraction(1, e + 1)
-                # integrated form
-                int_form = (SullivanForm(out_n, {'': {mk1: ck}}) -
-                            SullivanForm(out_n, {'': {mk2: ck}}))
-                
-                out_form += (
-                    int_form * SullivanForm(out_n, {dx_no_k: {m_no_k: sign*c}})
-                )
-        return out_form
-    
     def p(self):
         """
         Apply p to the form.
@@ -602,6 +541,7 @@ class SullivanForm:
                 J = ''
                 for i, e in enumerate([int(x) for x in m.split('|')]):
                     i = i + 1
+                    e = fractions.Fraction(e)
                     if i in dx:
                         c *= 1 / (e + 1)
                     elif e == 0:
@@ -611,13 +551,87 @@ class SullivanForm:
                 out_form += cdf.DupontForm(out_n, {f"{I},{J}": c})
         
         return out_form
+    
+    
+    def h(self, symmetric=True):
+        """
+        Apply the Dupont-Getzler contraction h to the form.
+
+        Returns
+        -------
+        out_form : cubical.SullivanForm
+            Contracted (integrated) form.
+
+        """
+        
+        out_n = self.n
+        out_form = SullivanForm.zero(out_n)
+        
+        if not symmetric:
+            for dx, p in self.form.items():
+                # degree 0 gives 0
+                if dx == '':
+                    continue
+                
+                I = [int(i) for i in dx.split('|')]
+                for m, c in p.items():
+                    m = [int(e) for e in m.split('|')]
+                    for cnt, i in enumerate(I):
+                        # sign comes from Koszul
+                        new_m = SullivanForm(out_n, f"{(-1)**cnt * c}")
+                        
+                        for j, e in enumerate(m):
+                            j = j + 1
+                            e = fractions.Fraction(e)
+                            if j < i and  j in I:
+                                new_m = (new_m *
+                                         SullivanForm(out_n, f"{1/(e+1)}*dx_{j}")
+                                         )
+                            elif j < i and j not in I and e == 0:
+                                new_m = (new_m *
+                                         SullivanForm(out_n, f"1 - x_{j}")
+                                         )
+                            elif j < i and j not in I and e > 0:
+                                new_m = (new_m *
+                                         SullivanForm(out_n, f"x_{j}")
+                                         )
+                            elif j == i:
+                                new_m = (new_m *
+                                         SullivanForm(out_n,
+                                                      (f"{1/(e+1)}*x_{j}^{e+1} -"
+                                                       f" {1/(e+1)}*x_{j}"))
+                                         )
+                            elif j > i and j in I:
+                                new_m = (new_m *
+                                         SullivanForm(out_n,
+                                                      f"x_{j}^{e}*dx_{j}")
+                                         )
+                            else:
+                                new_m = (new_m *
+                                         SullivanForm(out_n,
+                                                      f"x_{j}^{e}")
+                                         )
+                        out_form += new_m
+        
+        if symmetric:
+            raise NotImplementedError()
+        
+        return out_form
                         
         
 
 if __name__ == '__main__':
-    sf1 = SullivanForm(3, {'': {'0|2|1': 3}, '1': {'1|0|0': 2}})
-    print(sf1)
-    print(sf1.p())
-    
-    sf2 = SullivanForm(3, '1 - x_1')
-    print(sf2)
+# =============================================================================
+#     sf1 = SullivanForm(3, {'': {'0|2|1': 3}, '1': {'1|0|0': 2}})
+#     print(sf1)
+#     print(sf1.p())
+#     
+#     sf2 = SullivanForm(3, '1 - x_1')
+#     print(sf2)
+# =============================================================================
+
+    sf3 = SullivanForm(3, "x_1*x_2^2*x_3*dx_1*dx_2")
+    print(sf3)
+    print(sf3.h(symmetric=False))
+    print(sf3.h(symmetric=False).h(symmetric=False))
+    print(sf3.d().h(symmetric=False) + sf3.h(symmetric=False).d() == (sf3 - sf3.p().i()))

@@ -259,9 +259,9 @@ class DupontForm:
                     j = J.pop()
                     
                     if j == '0':
-                        dx *= csf.SullivanForm(out_n, f"x_{i}")
-                    else:
                         dx *= csf.SullivanForm(out_n, f"1 - x_{i}")
+                    else:
+                        dx *= csf.SullivanForm(out_n, f"x_{i}")
             
             out_form += dx
         
