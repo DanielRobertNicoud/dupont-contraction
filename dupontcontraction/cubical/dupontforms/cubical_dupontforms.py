@@ -6,6 +6,7 @@ import sys
 import os
 import fractions
 from copy import deepcopy
+import numpy as np
 
 sys.path.append(
     os.path.dirname(
@@ -17,6 +18,7 @@ sys.path.append(
 
 from cubical.signed_ordered_set import SignedOrderedSet
 import cubical.sullivanforms.cubical_sullivanforms as csf
+import cubical.dupontforms.binary_tree_generator as btg
 
 
 class DupontForm:
@@ -266,14 +268,91 @@ class DupontForm:
             out_form += dx
         
         return out_form
+    
+    
+    def tree_product(tree):
+        """
+        Compute the basic operation of the Cobar(Bar(Com))-algebra structure on
+        Dupont forms obtained by HTT from Sullivan forms via the Dupont contra-
+        ction. These basic operations are indexed by rooted trees.
+        
+
+        Parameters
+        ----------
+        tree : nested lists of Dupont forms.
+            For example [[a, b], [c, d, e]] with a,...,e Dupont forms. Every
+            vertex needs to be at least binary.
+
+        Returns
+        -------
+        Dupont form
+            The product of the transferred structure.
+
+        """
+        return DupontForm._tree_product(tree)
+    
+    def _tree_product(tree, root=True):
+        
+        if len(tree) < 2:
+            raise TypeError('Invalid tree.')
+        
+        aux_tree = []
+        for sub_tree in tree:
+            # if it is a Dupont form
+            if isinstance(sub_tree, DupontForm):
+                # any appearance of zero makes the whole thing zero
+                if sub_tree.is_zero:
+                    return DupontForm.zero(sub_tree.n)
+                aux_tree.append(sub_tree.i())
+            # otherwise iterate
+            else:
+                aux_tree.append(DupontForm._tree_product(sub_tree, root=False))
+                # any appearance of zero makes the whole thing zero
+                if aux_tree[-1].is_zero:
+                    return DupontForm.zero(aux_tree[-1].n)
+        
+        # now we have just a list of Sullivan form, take the product and apply
+        # h or p depending if we are at the root or not
+        if root:
+            return np.product(aux_tree).p()
+        else:
+            return np.product(aux_tree).h()
+    
+    
+    def a_infinity_product(*args):
+        
+        for duf in args:
+            if not isinstance(duf, DupontForm):
+                raise TypeError('All elements need to be Dupont forms.')
+        
+        out_n = args[0].n
+        for duf in args:
+            if duf.n != out_n:
+                raise ValueError('All Dupont forms need to have the same '
+                                 'simplicial dimension.')
+        
+        arity = len(args)
+        
+        out_form = DupontForm.zero(out_n)
+        for tree in btg.binary_tree_generator(arity):
+            sign = tree[0]
+            tree = btg.map_args(tree, args)
+            
+            form = sign*DupontForm.tree_product(tree)
+            
+            out_form += form
+        
+        return out_form
 
 
 if __name__ == '__main__':
     df1 = DupontForm(3, {'1|2,0': 1})
     df2 = DupontForm(3, {'1|3,0': 1})
-    df3 = DupontForm(3, {'3,01': 1})
+    df3 = DupontForm(3, {'3,10': 1})
     
     print((df1.i() * df2.i()).p())
     print(df1.i() * df3.i())
     print((df1.i() * df3.i()).p())
+    
+    print(DupontForm.tree_product([df1, df3]))
     

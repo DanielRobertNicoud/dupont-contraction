@@ -28,8 +28,12 @@ We recommend the use of a LaTeX viewer for Github.
 |         | import from `dupontcontraction.simplicial` (in preparation for    |
 |         | cubical version; to come in a future version).                    |
 +---------+-------------------------------------------------------------------+
-| 2.1.0   | (BLA)                                                             |
+| 2.1.0   | Implemented cubical Sullivan and Dupont forms in the              |
+|         | `dupontcontraction.cubical` module. Documentation will follow in  |
+|         | a later update.                                                   |
+|         |                                                                   |
 |         | Other changes/bug fixes:                                          |
+|         |                                                                   |
 |         | - Fixed bug in __repr__.                                          |
 +---------+-------------------------------------------------------------------+
 
@@ -45,11 +49,7 @@ setuptools.setup(
         " and the Dupont contraction.",
     long_description=long_description,
     url='https://github.com/DanielRobertNicoud/dupont-contraction',
-    install_requires=[
-        'fractions',
-        'itertools',
-        'numpy'
-    ],
+    install_requires=[],
     packages=setuptools.find_packages(),
     namespace_packages=['dupontcontraction']
 )
