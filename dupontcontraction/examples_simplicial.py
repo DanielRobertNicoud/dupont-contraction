@@ -1,8 +1,8 @@
 import pandas as pd
 import itertools as it
 
-from sullivanforms import sullivanforms as sf
-from dupontforms import dupontforms as duf
+import simplicial.sullivanforms.sullivanforms as sf
+import simplicial.dupontforms.dupontforms as duf
 
 if __name__ == '__main__':
     
