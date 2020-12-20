@@ -1,15 +1,13 @@
 """
-Class for Dupont forms.
+Class for cubical Dupont forms.
 """
-
-import itertools as it
-import fractions
-from copy import deepcopy
-import math
-import numpy as np
 
 import sys
 import os
+import fractions
+from copy import deepcopy
+import numpy as np
+
 sys.path.append(
     os.path.dirname(
         os.path.dirname(
@@ -18,46 +16,29 @@ sys.path.append(
     )
 )
 
-import dupontcontraction.simplicial.sullivanforms.sullivanforms as sf
-import dupontcontraction.simplicial.dupontforms.binary_tree_generator as btg
+from cubical.signed_ordered_set import SignedOrderedSet
+import cubical.sullivanforms.cubical_sullivanforms as csf
+import cubical.dupontforms.binary_tree_generator as btg
+
 
 class DupontForm:
     
     def __init__(self, n, form):
         """
-        Dupont forms.
         
-        Attributes
-        ----------
-        n : int
-            Simplicial dimension.
-        is_zero : bool
-            Indicates if the form is zero or not.
-        form : dict
-            Content of the form.
 
         Parameters
         ----------
         n : int
-            Simplicial dimension.
+            Cubical dimension.
         form : dict or string
             For a dict argument:
-                Keys are of the form i_0|...|i_k indicating the basic form
-                \omega_{i_0...i_k}, and the associated element is the
+                Keys are of the form 'i_1|...|i_k,j_1...j_{n-k} indicating the
+                basic form \omega_{I, J} where I is the set {i_1,...,i_k}
+                (ordered) and j_1,...,j_{n-k} are the images of the complement
+                of I (ordered). For example, for n=4 the key '2|4,01' denotes
+                I={2,4}, J(1) = 0, J(3) = 1. The associated element is the
                 coefficient of that form (a rational number).
-                Note that 1 = \omega_0 + ... + \omega_n
-
-        Raises
-        ------
-        TypeError
-            For mis-specified parameters.
-        Exception
-            DESCRIPTION.
-
-        Returns
-        -------
-        None.
-
         """
         
         if not isinstance(n, int):
@@ -66,6 +47,12 @@ class DupontForm:
             raise TypeError('invalid form')
         
         self.n = n
+        
+        if form == '0':
+            self.is_zero = True
+            self.form = dict()
+            return
+        
         self.is_zero = False
         
         if isinstance(form, str):
@@ -73,60 +60,48 @@ class DupontForm:
                                       'implemented yet')
         
         if isinstance(form, dict):
-            out_form = {}
-            
-            # transform 1 in the sum of the degree 0 basic forms
-            if '' in form:
-                c = fractions.Fraction(form[''])
-                for v in range(n + 1):
-                    if str(v) in form:
-                        form[str(v)] = fractions.Fraction(form[str(v)]) + c
-                    else:
-                        form[str(v)] = c
-            
-            for w in form:
-                if w == '':
-                    continue
+            out_form = dict()
+            for k, c in form.items():
+                I, J = k.split(',')
+                
+                if I != '':
+                    I = [int(i) for i in I.split('|')]
                 else:
-                    w_split = [int(i) for i in w.split('|')]
+                    I = []
                     
-                # check validity
-                for i in w_split:
-                    if i < 0 or i > n:
-                        raise TypeError('invalid form')
-                    
-                # check for invalid (zero) forms
-                # notice that degree = len(w_split) - 1
-                if len(w_split) > n + 1:
-                    continue
+                for i in I:
+                    if i <= 0 or i > n or not isinstance(i, int):
+                        raise TypeError('Invalid form')
+                I = SignedOrderedSet(I)
                 
-                # sign of permutation
-                sign = 1
-                for (i, j) in it.combinations(w_split, 2):
-                    if i == j:
-                        sign = 0
-                        break
-                    if i > j:
-                        sign *= -1
+                sign = I.sign()
+                degree = len(I)
                 
-                if sign == 0:
-                    continue
+                if len(J) != n - degree:
+                    raise TypeError('Invalid form')
                 
-                # add valid forms to out
-                w_split.sort()
-                w_out = '|'.join([str(i) for i in w_split])
-                out_form[w_out] = sign*fractions.Fraction(form[w])
-                if out_form[w_out] == 0:
-                    del out_form[w_out]
+                for j in J:
+                    if j not in '01':
+                        raise TypeError('Invalid form')
+                        
+                key = f"{str(I)},{J}"
+                coeff = sign*fractions.Fraction(c)
+                
+                if key in out_form:
+                    out_form[key] = coeff + out_form[key]
+                else:
+                    out_form[key] = coeff
+                
+                if out_form[key] == 0:
+                    del out_form[key]
+            
+            self.form = out_form
             
             # check for zero forms
             if not out_form:
                 self.is_zero = True
-            
-            self.form = out_form
-        return
-    
-    
+        
+        
     def __eq__(self, other):
         """
         Check equality of Dupont forms by comparing coefficients on the basis.
@@ -144,7 +119,7 @@ class DupontForm:
         """
         Zero Dupont form of simplicial degree n.
         """
-        return DupontForm(n, {'': 0})
+        return DupontForm(n, '0')
         
     
     def __repr__(self):
@@ -161,40 +136,44 @@ class DupontForm:
             return '0'
         
         r = ''
-        for k, w in enumerate(self.form):
-            c = self.form[w]
+        for i, (k, c) in enumerate(self.form.items()):
             
-            if k > 0:
-                r += ' '
-            
-            if c < 0:
+            if c > 0 and i > 0:
+                r += ' + '
+            elif c < 0 and i > 0:
+                r += ' - '
+            elif c < 0 and i == 0:
                 r += '-'
-                c = -c
-            elif k > 0:
-                r += '+'
             
-            if k > 0:
-                r += ' '
-            
-            if c == 1:
-                if w == '':
-                    if c.denominator == 1:
-                        r += f"{c.numerator}"
-                    else:
-                        r += f"\\frac{{{c.numerator}}}{{{c.denominator}}}"
-                else:
-                    pass
-            elif c.denominator == 1:
-                r += f"{c.numerator}"
+            if c.denominator == 1:
+                if abs(c.numerator) != 1:
+                    r += str(abs(c.numerator))
             else:
-                r += f"\\frac{{{c.numerator}}}{{{c.denominator}}}"
+                r += f"\\frac{{{abs(c.numerator)}}}{{{c.denominator}}}"
             
-            if w == '':
-                continue
+            if k[0] != ',' and k[-1] != ',':
+                r += f"\\omega_{{{k}}}"
+            elif k[-1] != ',':
+                r += f"\\omega_{{\\emptyset{k}}}"
             else:
-                r += f"\omega_{{{w}}}"
-            
+                r += f"\\omega_{{{k}\\emptyset}}"
+        
         return r
+    
+    
+    def __rmul__(self, other):
+        """
+        Scalar multiplicaiton of Dupont forms.
+        """
+        try:
+            other = fractions.Fraction(other)
+        except:
+            raise TypeError('Invalid scalar multiplication.')
+        
+        return DupontForm(
+            self.n,
+            {w: other*c for w, c in self.form.items()}
+        )
                 
     
     def __add__(self, other):
@@ -236,31 +215,7 @@ class DupontForm:
                     del out_form[w]
             else:
                 out_form[w] = c
-        
         return DupontForm(self.n, out_form)
-    
-    
-    def __rmul__(self, other):
-        """
-        Scalar multiplicaiton of Dupont forms.
-        """
-        try:
-            other = fractions.Fraction(other)
-        except:
-            raise TypeError('Invalid scalar multiplication.')
-        
-        return DupontForm(
-            self.n,
-            {w: other*c for w, c in self.form.items()}
-        )
-    
-    
-    def __radd__(self, other):
-        """
-        Sum of scalar with form.
-        """
-        return DupontForm(self.n, {'': other}) + self
-    
     
     def d(self):
         """
@@ -268,9 +223,21 @@ class DupontForm:
         """
         out_n = self.n
         out_form = DupontForm.zero(out_n)
-        for w, c in self.form.items():
-            for i in range(out_n + 1):
-                out_form += DupontForm(out_n, {f"{i}|{w}": c})
+        
+        for k, c in self.form.items():
+            I, J = k.split(',')
+            I = [int(i) for i in I.split('|')]
+            J = [int(j) for j in list(J)]
+            for cnt, (i, j) in  enumerate(
+                    zip([x for x in range(1, out_n+1) if x not in I], J)):
+                    
+                sign = (-1)**(j + (i - 1 - cnt))
+                out_I = '|'.join([str(y) for y in 
+                                  I[:i - 1 - cnt] + [i] + I[i - 1 - cnt:]])
+                out_J = ''.join([str(z) for z in J[:cnt] + J[cnt + 1:]])
+                
+                out_form += DupontForm(out_n, {f"{out_I},{out_J}": sign * c})
+        
         return out_form
         
         
@@ -279,32 +246,26 @@ class DupontForm:
         Map i of the contraction, returns a SullivanForm.
         """
         out_n = self.n
-        out_form = sf.SullivanForm(out_n, {})
+        out_form = csf.SullivanForm(out_n, dict())
         
-        for w, c in self.form.items():
-            if w == '':
-                aux_sf = sf.SullivanForm(
-                    out_n,
-                    {'': {'|'.join(['0' for i in range(out_n + 1)]): c}}
-                )
-            else:
-                w_split = w.split('|')
-                # Sullivan form associated to w
-                aux_sf = {}
-                for k in range(len(w_split)):
-                    sign = (-1)**k
-                    dt = '|'.join(w_split[:k] + w_split[k+1:])
-                    
-                    p = ['0' for i in range(out_n + 1)]
-                    p[int(w_split[k])] = '1'
-                    p = '|'.join(p)
-                    
-                    aux_sf[dt] = {p: sign*c}
-                
-                aux_sf = math.factorial(len(w_split) - 1) * \
-                    sf.SullivanForm(out_n, aux_sf)
+        for k, c in self.form.items():
+            I, J = k.split(',')
+            dx = csf.SullivanForm(out_n, {I: {'|'.join(['0'] * out_n): c}})
             
-            out_form += aux_sf
+            I = I.split('|')
+            
+            J = list(J)
+            J.reverse()
+            for i in range(1, out_n + 1):
+                if str(i) not in I:
+                    j = J.pop()
+                    
+                    if j == '0':
+                        dx *= csf.SullivanForm(out_n, f"1 - x_{i}")
+                    else:
+                        dx *= csf.SullivanForm(out_n, f"x_{i}")
+            
+            out_form += dx
         
         return out_form
     
@@ -385,19 +346,13 @@ class DupontForm:
 
 
 if __name__ == '__main__':
-    # playground
-    w0 = DupontForm(3, {'0': 1})
-    w1 = DupontForm(3, {'1': 1})
-    w2 = DupontForm(3, {'2': 1})
-    w3 = DupontForm(3, {'3': 1})
-    w01 = DupontForm(3, {'0|1': 1})
-    w02 = DupontForm(3, {'0|2': 1})
-    w03 = DupontForm(3, {'0|3': 1})
-    w12 = DupontForm(3, {'1|2': 1})
-    w13 = DupontForm(3, {'1|3': 1})
-    w23 = DupontForm(3, {'2|3': 1})
-    w012 = DupontForm(3, {'0|1|2': 1})
-    w013 = DupontForm(3, {'0|1|3': 1})
-    w023 = DupontForm(3, {'0|2|3': 1})
-    w123 = DupontForm(3, {'1|2|3': 1})
-    w0123 = DupontForm(3, {'0|1|2|3': 1})
+    df1 = DupontForm(3, {'1|2,0': 1})
+    df2 = DupontForm(3, {'1|3,0': 1})
+    df3 = DupontForm(3, {'3,10': 1})
+    
+    print((df1.i() * df2.i()).p())
+    print(df1.i() * df3.i())
+    print((df1.i() * df3.i()).p())
+    
+    print(DupontForm.tree_product([df1, df3]))
+    
